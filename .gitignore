@@ -1,0 +1,16 @@
+# Data are large (~8.6 GB) and public; see README for sources
+Raw Data/
+Output pdfs/
+Output tables/
+Stan Models/Saved Models/
+*.rds
+*.RData
+.Rhistory
+.Rproj.user/
+.DS_Store
+# Keep only the small species reference tables from processed data
+Processed Data/*
+!Processed Data/Analysis Ready Data/
+Processed Data/Analysis Ready Data/*
+!Processed Data/Analysis Ready Data/spptable.csv
+!Processed Data/Analysis Ready Data/tableinfo.csv

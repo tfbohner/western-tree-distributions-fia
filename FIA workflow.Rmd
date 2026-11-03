@@ -1,0 +1,426 @@
+---
+title: "FIA workflow"
+author: "Teresa Bohner"
+date: "7/7/2020"
+output: 
+  html_document:
+    toc: true
+    collapsed: false
+    toc_float: true
+    toc_depth: 4
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(eval = FALSE)
+
+```
+
+## Overview
+
+This is the workflow for the FIA biogeography analyses. It will step through separate R scripts working through data wrangling (cleaning, data manipualtion), statistical modeling, output visualization and sumary figures of the results. 
+
+## To-Do
+
+I have addressed the flow of scripts and the paths for all of the data inputs and outputs, however I have not addressed the paths for the figures. This will need to be addressed if you want to re-create any of the figures.
+
+I didn't move any of the saved models (section 4) but I did change the paths in the script if you re-run it it should save new ones.
+
+
+## 1. Data Gathering & Cleaning
+Here we extract the data we need from the raw FIA data files from CA, OR, WA.  We gathered Climate data (temperature and Soil Water Balance). The FIA script matches individual tree, seedling and plot level data where needed, attaches the climate data and cleans out any problematic records (treeIDs that do not match etc). This is also the file where we summarize the tree-level data into presence/absence and abundance datasets. We also include here the gathering and matching of trait and phylogenenetic data for all of the species.
+
+### Climate data
+We're using the 50 year normal Priestley-Taylor coefficient for soil water balance calculated at the 30 arc second (~920 m) resolution from WorldClim and GlobalPET data inputs.  Download the data [here](http://www.cgiar-csi.org/data/global-high-resolution-soil-water-balance).
+
+Also, we're using temperature data at the same resolution from WorldClim.  Download the data [here](http://worldclim.org/version2).
+
+All the raw raster data for these analyses can be found in the Climate Data folder.
+
+```
+FIA II
+└─┬ Raw Data
+  └──Climate Data
+```
+
+**These data were matched with the actual plot locations by the FIA office. The values for the plot level data can be found here:**
+
+```
+FIA II
+└─┬ Raw Data
+  └─┬ From FIA
+    ├── alpha_extractvalu.xlsx
+    └── temp_vals_realloc.xlsx
+    
+```
+
+### FIA Data
+##### Script
+```{r data cleaning}
+source("R scripts/1_Raw FIA Processing.R")
+```
+
+##### Data Inputs
+```
+FIA II
+└─┬ Raw Data
+  └─┬ CA 2 / OR / WA
+    ├── REF_SPECIES.csv
+    ├── STATE_TREE.csv
+    ├── STATE_SEEDLING.csv
+    ├── STATE_PLOT.csv
+    └── STATE_TREE_GRM_ESTN.csv
+
+```
+
+##### Data Outputs
+```
+FIA II
+└─┬ Processed Data
+  ├── plots.sub.csv
+  ├── Allplot.Occurdata.csv
+  ├── Allspecies.abundance.csv
+  ├── All.Treedata.csv
+  └── Seedling.data.csv
+
+```
+
+### Trait Data
+We gathered trait data from multiple sources. This is not an exhaustive list of the traits cleaned and available. We merged sources for some of the traits?
+
+**BIEN:** Latitudinal extent, SLA, leaf nitrogen, wood density
+
+**World Agroforestry** Wood density
+
+**USDA plants**
+
+**TRY** Seed mass, dispersal mode, lifespan, rooting depth
+
+**Niinemets and Valledares 2006** Shade tolerance, Drought tolerance
+
+Also within this script I built a phylogeny from NCBI and visualize the trait distributions among species and plant families.
+
+
+
+##### Script
+```{r gather_traits}
+source("R scripts/1_Gather All Traits.R")
+```
+
+##### Data Inputs
+```
+FIA II
+└─┬ Raw Data
+  └─┬ Traits
+    ├── USDAwetlandReportDownload.txt
+    ├── USDAplantsdownloadData.txt
+    ├── USDAclasses.txt
+    ├── worldagro_wood density.txt
+    ├── TryAccSpecies.txt
+    ├─┬  TRY
+    │ └─┬ TRY data
+    │  └── 4612.txt
+    └──Niinemets and Valladares 2006 shade tolerance.csv
+
+```
+
+##### Data Outputs
+```
+FIA II
+└─┬ Processed Data
+  ├─┬  Processed Traits
+  │ ├── bien traits.csv
+  │ ├── TraitSummaries.csv
+  │ └── TRY_CleanQuantTraits.csv
+  └─┬ Analysis Ready Data
+    └── all_traits.csv
+
+```
+
+## 2. Data Manipulation
+Reads in the processed data and gets it ready for our specific analyses. Subset to only species found in more than 25 plots, omit records with NA's. Occurrence and abundance only include data from the most recent survey. Growth data only includes data from plots vistited more than once. This script also creates the reference datasheet for species names and their index because Stan can only handle indices from 1-n. This allows us to match up species outputs properly post-analysis.
+
+##### Script
+```{r data prep }
+source("R scripts/2_Data Prep.R")
+```
+
+##### Data Inputs
+```
+FIA II
+└─┬ Processed Data
+  ├── Allplot.Occurdata.csv
+  ├── Allspecies.abundance.csv
+  ├── All.Treedata.csv
+  └── Seedling.data.csv
+
+```
+
+##### Data Outputs
+```
+FIA II
+└─┬ Processed Data
+  └─┬ Analysis Ready Data
+    ├── occurrence.csv
+    ├── abundance.csv
+    ├── trees.csv
+    ├── surv.csv
+    ├── recruits.csv
+    └── spptable.csv
+
+```
+
+```{r spptable, echo=F, eval=F}
+spptable <- read.csv('Processed Data/Analysis Ready Data/spptable.csv')
+library(knitr)
+kable(spptable[,c(1,3:6)])
+```
+
+## 3. Exploratory Analysis and Visualization
+Any scripts here deal with exploring the data prior to analysis
+
+### Vital rate correlations
+See if vital rates re correlated at the plot level
+
+##### Script
+```{r correlations}
+source("R scripts/3_Vital Rate Correlations.R")
+```
+
+### Range overlap
+See how much of the range is represented by the data
+
+##### Script
+```{r maps}
+source("R scripts/3_Range Maps.R")
+```
+
+##### Data Inputs
+```
+FIA II
+└─┬ Raw Data
+  └─┬ GIS 
+    └── E. Little Maps
+```
+
+### Traits
+Explore the distribution of traits and relationships between traits for selection
+```{r trait_explore}
+source("R scripts/3_Traits exploratory.R")
+```
+
+
+## 4. Distribution and Vital Rate Modeling 
+This script steps through each response to be modeled: occurrence, abundance, growth, survival, and reproduction. This is the script that runs all of the Stan models and saves all of the results.  
+
+May need to create some parent directories for the saved RDS model fits to go into. I haven't re-run this code in the new directory to see if everything works out quite right. I copied the final data products over from the original directory but not the saved models. 
+
+Eventually it would be nice to transition this over to brms and tidybayes if possible. It would potentially significantly simplify the code...I'm just not exactly sure about doing the calculations with this. I had tinkered with transitioning to brms earlier and took that code out and saved the snippets in ` source("R scripts/4_All Vitals Brms.R)`
+
+##### Script
+```{r analysis }
+source("R scripts/4_All Vitals Stan Models.R")
+```
+For each response the script works in sections:
+
+1. Read in the necessary data
+2. Prepare the data for analyses
+ + Scale covariates
+ + Prepare calculated SWB quantities for use in vital rate models
+ + Set up ragged array/sparse matrix database for spp*plot if necessary
+3. Run Stan model
+4. Model Output
+ + Save predicted (partial) SWB regression
+ + Optimum SWB predicted rate selection (vital rate modeling)
+ + Mismatch and cost calculation (vital rate modeling)
+5. Visualization
+ + Model diagnostics (traceplots, posterior summaries)
+ + Modeled response with data
+ + Vital rate and abundance plots
+6. Save the workspace for each model and its outputs
+
+
+### Distribution Modeling
+**Occurrence** (Bernoulli) model is looped through species individually.  
+
+##### Data Inputs
+```
+FIA II
+└─┬ Processed Data
+  └─┬ Analysis Ready Data
+    ├── occurrence.csv
+    └── spptable.csv
+
+```
+
+##### Stan Models
+```
+FIA II
+└─┬ Stan Models
+  └──  binomial_swb_spp.stan
+
+```
+
+##### Data Outputs
+Save SWB axes and predicted regressions for occurrence for plotting with vital rates later. Save species specific calculated maximum, minimum, and optimum SWB values for occurrence for use in vital rate model calculations later. Save lengths of observations modeled for reporting.  
+```
+FIA II
+└─┬ Processed Data
+  └─┬ Analysis Ready Data
+    ├── swb_axes_p.csv
+    ├── theta_swb.csv
+    ├── distromaxminopt_swb.csv
+    └── tableinfo.csv
+
+```
+
+##### Output Figures
+Plots of occurrence and abundance across SWB gradient
+```
+FIA II
+  └── Output pdfs
+```
+
+### Vital Rate Modeling
+**Abundance** (Negative Binomial) is also looped through species individually.
+**Growth** (Normal) model is looped through species individually for speed.  
+**Survival** (Bernoulli) model is looped through species individually for speed. 
+**Recruitment** (ZINB) model is run for all species together. Data is summarized at the plot level.
+
+##### Data Inputs
+Inputs now include maximum, minimum, and optimum SWB values for occurrence and abundance for calculating mismatch and demographic cost. Inputs also include SWB axes and predicted regressions for plotting vital rates against distributions.  
+```
+FIA II
+└─┬ Processed Data
+  └─┬ Analysis Ready Data
+    ├── abundance.csv
+    ├── trees.csv
+    ├── surv.csv
+    ├── recruits.csv
+    ├── distromaxminopt_swb.csv
+    ├── swb_axes_p.csv
+    ├── theta_swb.csv
+    └── tableinfo.csv
+
+```
+
+##### Stan Models
+```
+FIA II
+└─┬ Stan Models
+  ├── abundance_new_spp_nb.stan
+  ├── grow_ind_swb_temp_spp_var.stan
+  ├── surv_swb_temp_spp.stan
+  └── recruit_plot_swb_temp.stan
+
+```
+
+##### Data Outputs
+Save minimum, maximum, distribution-max, and demographic-max SWB values and associated predicted regression values along with mismatch and demographic cost values for each species and vital rate for results summaries. Save lengths of observations modeled for reporting.  
+```
+FIA II
+└─┬ Processed Data
+  └─┬ Analysis Ready Data
+    ├── abunswbs_temp.csv
+    ├── abun_betas_swb_temp.csv
+    ├── growswbs_temp.csv
+    ├── grow_betas_swb_temp.csv
+    ├── max_grow_obs.csv
+    ├── survswbs_temp.csv
+    ├── surv_betas_swb_temp.csv
+    ├── recswbs_temp.csv
+    ├── rec_betas_swb_temp.csv
+    ├── max_rec_obs.csv
+    ├── rec_r2.csv
+    └── tableinfo.csv
+
+```
+
+##### Output Figures
+Plots of growth, survival and reproduction and averaged data across SWB gradient. Combination figures with distribution regressions showing mismatch and demographic cost.  
+```
+FIA II
+  └── Output pdfs
+```
+
+## 5. Final Analyses and Figures
+### Regression coefficients summaries
+  + Join all regression coefficients and trait data
+  + General summaries
+  + Summaries by traits
+  + Lots of figures (separate)
+
+##### Script
+```{r betas}
+source("R scripts/5_Beta summaries.R")
+source("R scripts/5_Beta figures.R")
+```
+
+##### Data Outputs
+```
+FIA II
+└─┬ Output tables
+    └── swb_betas.csv
+```
+
+### Mismatch and Cost summaries
+  + Join all mismatch, cost, and trait data
+  + General summaries
+  + Visualization with traits (separate)
+  
+##### Script
+```{r mismatch}
+source("R scripts/5_Mismatch summaries.R")
+source("R scripts/5_Mismatch figures.R")
+```
+
+##### Data Outputs
+```
+FIA II
+├─┬ Processed Data
+│ └─┬ Analysis Ready Data
+│   └── all_mismatch_and_traits.csv
+└─┬ Output tables
+  ├── mismatch_vr.csv
+  ├── mismatch_spp.csv
+  ├── abs_mismatch_vr.csv
+  ├── cost_vr.csv
+  └── percent_cost_vr.csv
+
+```
+
+
+### Trait regressions
+  + Brms models of trait effects on mismatch, cost
+    + loo selection for phylogenetic signal
+    + none of these models were saved, but I think they're fairly quick to run.
+  + Generate final trait figure here
+
+##### Script
+```{r trait_reg}
+source("R scripts/5_Trait phylo brms.R")
+```
+
+```
+FIA II
+└─┬ Output tables
+  └── phylo_lambda.csv
+
+```
+  
+### Final manuscript figures
+
+##### Script
+```{r final}
+source("R scripts/5_Final ms figures.R")
+```
+
+## 6. Miscellany
+
+I've included a script here that I used to compare the results from modeling occurrence as a response to just SWB versus SWB and temperature. I did not address any of the file path issues as I thought this might be an unlikely candidate to be re-run. 
+
+
+##### Script
+```{r misc}
+source("R scripts/6_Pres abs with temp comparison.R")
+```
