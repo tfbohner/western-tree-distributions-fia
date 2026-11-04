@@ -1,4 +1,7 @@
-## Figures for plot and species level correlations of average demographic rates 
+## 3_Vital Rate Correlations
+## Plot- and species-level correlations among average vital rates.
+## Author: Teresa Bohner
+## Project: where western trees grow vs. where they thrive (see README)
 
 data.path <- "Processed Data/Analysis Ready Data/"
 
@@ -120,6 +123,5 @@ ggplot(spp_cor2, aes(x=dum, y=cor)) +
   geom_hline(yintercept = 0, linetype="dashed") +
   facet_grid(row~col, labeller=labeller(row = labels, col = labels)) 
 dev.off()
-
 
 

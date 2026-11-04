@@ -1,4 +1,8 @@
-## miscellaneous final analysis visualization
+## 5_Mismatch figures
+## Figures of distribution-performance mismatch and demographic cost.
+## Author: Teresa Bohner
+## Project: where western trees grow vs. where they thrive (see README)
+
 library(bbmle)
 library(ggplot2)
 library(ggpmisc)
@@ -10,8 +14,6 @@ library(doBy)
 library(lme4)
 
 source("R scripts/5_Mismatch trait data compilation.R")
-
-
 
 
 ## wide format----
@@ -56,7 +58,6 @@ surv <- subset(SWBs, vr=="1surv")
 grow <- subset(SWBs, vr=="2growth")
 rec <- subset(SWBs, vr=="3rec")
 
-# pdf("Output pdfs/ESA figures/mismatch histogram.pdf")
 ggplot(SWBs, aes(mismatch_p)) +
   geom_histogram(aes(fill=vr))+
   facet_wrap(~vr, ncol=1, scales="free_x", labeller=vr_labeller) +  
@@ -67,12 +68,6 @@ ggplot(SWBs, aes(mismatch_p)) +
   theme(panel.border = element_rect(size=1, fill = NA)) +
   labs(x="Mismatch", y="Number of Species")+
   theme(text = element_text(size=18), strip.text.x = element_text(size = 18, face = "bold"))
-# dev.off()
-
-
-
-
-
 
 
 ## Sensitivity plots----
@@ -360,8 +355,6 @@ ggplot(data=SWBs, aes(x=abmis_p, y=cost_p)) +
 corr_s <- cor.test(SWBwide$abmis_p_1surv, SWBwide$cost_p_1surv, method = 'spearman', exact=F)
 corr_g <- cor.test(SWBwide$abmis_p_2growth, SWBwide$cost_p_2growth, method = 'spearman', exact=F)
 corr_r <- cor.test(SWBwide$abmis_p_3rec, SWBwide$cost_p_3rec, method = 'spearman', exact=F)
-
-
 
 
 pdf("Output pdfs/mismatch-cost scatter.pdf")
@@ -831,6 +824,5 @@ ggplot(SWBs, aes(x=bien_value_leaf_nitrogen_content_per_leaf_dry_mass, y=abmis_p
   stat_poly_eq(aes(label = ..rr.label..), size = 3, 
                formula = y~x, parse = TRUE)
 dev.off()
-
 
 

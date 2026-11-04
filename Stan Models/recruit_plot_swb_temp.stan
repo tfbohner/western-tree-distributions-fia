@@ -16,7 +16,6 @@ data {
   vector[N_pred] swb_pred;
 }
 
-
 parameters {
   real a_pres[N_spp];
   real a_abund[N_spp];
@@ -28,21 +27,18 @@ parameters {
   real b_swb[N_spp];  
   real b2_swb[N_spp];  
   
-  // real<lower=.000001> alpha;  // added for Neg Bin
   real<lower=0> phi[N_spp];
 
 }
-
 
 transformed parameters {
   vector[N] mu;
   vector[N] theta;
   
-  for(i in 1:N){  // changed spp to speciesID
+  for(i in 1:N){
   
   theta[i] = a_pres[spp[i]] ;
  
-  // mu[i] = exp(a_abund[spp[i]] + b_adcount[spp[i]]*adcount[i] + b_ba[spp[i]]*avgba[i]+ b_swb[spp[i]]*swb[i] + b2_swb[spp[i]]*(swb[i])^2  + b_temp[spp[i]]*temp[i] + b2_temp[spp[i]]*(temp[i]^2)); 
     mu[i] = a_abund[spp[i]] + b_adcount[spp[i]]*adcount[i] + b_ba[spp[i]]*avgba[i]+ b_swb[spp[i]]*swb[i] + b2_swb[spp[i]]*(swb[i])^2  + b_temp[spp[i]]*temp[i] + b2_temp[spp[i]]*(temp[i]^2); 
 
   }
@@ -76,8 +72,6 @@ model {
    }
 
 generated quantities{
-  // vector[N] sdlgs_rep;
-  // int zero;
 
   real wet_swb[N_spp];
   real dry_swb[N_spp];
@@ -89,27 +83,7 @@ generated quantities{
   real r_hat_pres[N_spp];
   real r_hat_opt[N_spp];
 
-  real mu_pred[N_spp, N_pred]; //<lower=0, upper=10000>
-
-  // real log_lik[N];
-  //
-  // for (i in 1:N) {
-  //         if (sdlgs[i] == 0) {
-  //           log_lik[i] = log_sum_exp(bernoulli_logit_lpmf(1 | theta[i]),
-  //                              bernoulli_logit_lpmf(0 | theta[i]) +
-  //                              neg_binomial_2_log_lpmf(sdlgs[i] | mu[i], phi[spp[i]]));
-  //         } else {
-  //           log_lik[i] = bernoulli_logit_lpmf(0 | theta[i]) +
-  //                              neg_binomial_2_log_lpmf(sdlgs[i] | mu[i], phi[spp[i]]);
-  //
-  //         }
-  //     }
-  //
-// 	for(i in 1:N){
-// 	     zero=bernoulli_logit_rng(theta[i]);
-// 	     sdlgs_rep[i]=(1-zero)*neg_binomial_2_log_lpmf(mu[i], phi[spp[i]]);
-//
-//   }
+  real mu_pred[N_spp, N_pred];
 
   for(s in 1:N_spp){
     for(i in 1:N_pred){

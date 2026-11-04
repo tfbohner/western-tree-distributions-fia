@@ -1,4 +1,7 @@
-###### Compile traits from various sources
+## 1_Gather All Traits
+## Compile functional traits (BIEN, TRY, USDA PLANTS, wood density, shade tolerance) and build the species phylogeny.
+## Author: Teresa Bohner
+## Project: where western trees grow vs. where they thrive (see README)
 
 library(data.table)
 library(reshape2)
@@ -37,8 +40,6 @@ alt_spp$fia_gensp <- c("Abies shastensis",
 species_summary <- merge(species_summary, alt_spp, by=c("gensp", "fia_gensp"), all=T)
 spplist <- as.character(unique(species_summary$gensp))
 
-# species_summary$gensp <- sub("Lithocarpus","Notholithocarpus",species_summary$gensp)
-# species_summary$gensp <- sub("Chamaecyparis nootkatensis","Cupressus nootkatensis",species_summary$gensp)
 
 occurrence <- BIEN_occurrence_species(species = spplist, native.status = T)
 occurrence_sub <- filter(occurrence, is_introduced!=1)
@@ -101,15 +102,9 @@ citation_info<-BIEN_metadata_citation(trait.dataframe = citingtraits,
                                       acknowledgement_file=file.path("Processed Data/Processed Traits/fia_bie_traits_ack.txt"))
 
 ### USDA plants----
-# library(request); library(tibble)
-# root <- api("https://plantsdb.xyz")
-# root %>% api_path(heartbeat)
-# test <- root %>% api_path(search) %>%
-#   api_query(Genus = Pinus, fields = "Genus,Species,Scientific_Name_x")
 
 ### USDA plants wetland indicator species
 usda <- read.table("Raw Data/Traits/USDAwetlandReportDownload.txt", sep=",", header=T)
-# usda$Scientific.Name <-  str_replace(usda$Scientific.Name,"Callitropsis nootkatensis", "Cupressus nootkatensis")
 
 scoretable <- as.data.frame(cbind(c("UPL","FACU","FAC","FACW"), c(1:4)))
 names(scoretable) <- c("Indicator", "Score")
@@ -133,7 +128,6 @@ all_traits <- merge(all_traits,
                     by.x="gensp", by.y="Scientific.Name", all=T)
 
 usda4 <- read.csv("Raw Data/Traits/USDAplantsdownloadData.txt", sep=",", header=T)
-# usda4$Scientific.Name <-  str_replace(usda4$Scientific.Name,"Callitropsis nootkatensis", "Cupressus nootkatensis")
 usda4 <- usda4 %>% subset(Scientific.Name %in% spplist)
 usda4$Height.at.Base.Age..Maximum..feet. <- NULL
 usda4$Vegetative.Spread.Rate <- NULL
@@ -148,20 +142,11 @@ all_traits <- merge(all_traits,
                     dplyr::select(usda5, -c("Accepted.Symbol", "Synonym.Symbol")), 
                     by.x="gensp", by.y="Scientific.Name", all=T)
 
-# ## Wood density from Zanne this is also in all of the Bien data
-# wood_dens <- read.csv("Raw Data/Traits/Wood_density.csv")
-# wood_dens <- rename(wood_dens, gensp=Binomial, dens = Wood.density..g.cm.3...oven.dry.mass.fresh.volume)
-# wood_dens <- subset(wood_dens, Region=="NorthAmerica")
-# wood_dens1 <- subset(wood_dens, gensp%in%species_summary$gensp)
-# which(duplicated(wood_dens1$gensp))
-# wood_dens1 <- wood_dens1[-29,]
 
 ## Wood density from worldagroforestry----
 wood_dens2 <- read.delim("Raw Data/Traits/worldagro_wood density.txt")
 wood_dens2$X <- NULL
 wood_dens2 <- rename(wood_dens2, gensp=species)
-# wood_dens <- merge(wood_dens1, wood_dens2, all=T)
-# wood_dens$density <- ifelse(is.na(wood_dens$dens), wood_dens$wd, wood_dens$dens)
 
 all_traits <- merge(all_traits, wood_dens2[1:2], by="gensp", all.x=T)
 
@@ -187,16 +172,9 @@ head(temp); dim(temp)
 
 filter(temp, is.na(AccSpeciesID)==TRUE)
 
-# our.species <- read.table("species.list.csv",sep=',',header=TRUE)
-# head(our.species)
-# our.species$species <- sub("Lithocarpus","Notholithocarpus",our.species$species)
-# our.species$species <- sub("Chamaecyparis nootkatensis","Cupressus nootkatensis",our.species$species)
-# temp2 <- merge(our.species, sp.try, by.x='species', by.y='AccSpeciesName')
-# write.csv(temp2$AccSpeciesID,"Raw Data/Traits/sp.code.list.csv",row.names=FALSE)
 
 ## Now have TRY data - This section for reading it in etc ----
 
-#try.data <- read.table("TRY/TRY data/4612.txt",sep='\t',header=TRUE)
 try.data.all <- read.delim("Raw Data/Traits/TRY/TRY data/4612.txt", header = T)
 
 head(try.data.all); dim(try.data.all)
@@ -292,10 +270,7 @@ try.height.spp <- unique(try.height$AccSpeciesName)%>%
 all.height.spp <- unique(all_traits$gensp[which(is.finite(all_traits$Height..Mature..feet.))])%>%
   as.character()
 
-# try_only2 <- setdiff(try.height.spp, all.height.spp)
-# usda_only2 <- setdiff(all.height.spp, try.height.spp)
 # More height measurements from TRY alone
-# all_traits$Height..Mature..feet. <- NULL
 
 try.height2 <- subset(try.height, OriglName=="MaximumHeightM")
 height.2.spp <- unique(try.height2$AccSpeciesName)
@@ -488,8 +463,6 @@ plot(tr)
 test <- tr$classification
 
 families <- dplyr::select(tr$classification, c(species, family))
-# all_traits$gensp <- sub("Cupressus nootkatensis","Callitropsis nootkatensis",all_traits$gensp)
-# all_traits$gensp <- sub("Abies shastensis","Abies magnifica var. shastensis",all_traits$gensp)
 rownames(families) <- NULL
 families <- families %>% distinct()
 all_traits <- merge(all_traits, families, by.x="gensp", by.y="species", all.x=T)

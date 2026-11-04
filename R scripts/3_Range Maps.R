@@ -1,4 +1,7 @@
-## Exploratory analysis of how much of the range is represented by our data
+## 3_Range Maps
+## Check how much of each species' range (Little's range maps) the inventory plots cover.
+## Author: Teresa Bohner
+## Project: where western trees grow vs. where they thrive (see README)
 
 library(data.table)
 library(reshape2)
@@ -62,15 +65,6 @@ for(i in 1:nrow(spptable)) {
     proj4string(shape) <- CRS("+init=epsg:4267")
     shape2 <- spTransform(shape, 
                           CRS("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=37.5 +lon_0=-96"))
-    # spp <- BIEN_ranges_load_species(species=spptable$gensp[which(spptable$spid==i)])
-    # spp2 <- spTransform(spp, 
-    #                     CRS("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=37.5 +lon_0=-96"))
-    # # this is a well known R / GEOS hack (usually combined with the above) to 
-    # # deal with "bad" polygons
-    # spp2 <- gBuffer(spp2, byid=TRUE, width=0)
-    # 
-    # intersection<- gIntersection(spp2, states2)
-    # spptable$overlap[i] <- round(sum(gArea(intersection))/gArea(spp2)*100, 2)
     
     intersection<- gIntersection(shape2, states2)
     spptable$overlap[i] <- round(sum(gArea(intersection))/gArea(shape2)*100, 2)

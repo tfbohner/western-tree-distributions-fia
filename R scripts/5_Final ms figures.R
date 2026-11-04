@@ -1,6 +1,7 @@
-### Description: Final figures for FIA ms
-### Author: Teresa Bohner
-### Date modified: 2 Oct 2018
+## 5_Final ms figures
+## Final manuscript figures.
+## Author: Teresa Bohner
+## Project: where western trees grow vs. where they thrive (see README)
 
 ## packages----
 library(tidyverse)
@@ -56,9 +57,6 @@ p1 <- ggplot(SWBs, aes(overlap_max, abmis_p, color=vr)) +
                   label.y= "top", size = 4) +
   theme_classic() +
   ylab("Mismatch magnitude") + xlab("% range overlap, larger value") +
-  # scale_color_discrete(name="",
-  #                      breaks=c("0abun", "1surv", "2growth", "3rec"),
-  #                      labels=c("Density", "Survival", "Growth", "Recruitment"))
   theme(legend.position = "none")
 p1
 
@@ -71,9 +69,6 @@ p2 <- ggplot(SWBs, aes(overlap_max, mismatch_p, color=vr), labeller=vr_labeller)
                   label.y.npc = 1, size = 4) +
   theme_classic() +
   ylab("Mismatch") + xlab("% range overlap, larger value") +
-  # scale_color_discrete(name="",
-  #                     breaks=c("0abun", "1surv", "2growth", "3rec"),
-  #                     labels=c("Density", "Survival", "Growth", "Recruitment"))
   theme(legend.position = "none")
 p2
 
@@ -1040,7 +1035,6 @@ p3 <- ggplot(SWBwide, aes(mismatch_p_3rec, scaled_cost_p_3rec)) +
 p3  
 
 
-
 pdf("Output pdfs/jan19 abundance figures/Fig 3_abundance_percent.pdf", width = 9, height = 7.5)
 grid.arrange(p0,p1, p2, p3, nrow=2)
 dev.off()
@@ -1200,6 +1194,5 @@ p3
 pdf("Output pdfs/jan19 abundance figures/SWB Mismatch fullrange.pdf", width = 8, height = 8)
 grid.arrange(p0,p1, p2, p3, nrow=2)
 dev.off()
-
 
 

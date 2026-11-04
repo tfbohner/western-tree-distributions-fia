@@ -33,8 +33,6 @@ model{
 }
 
 generated quantities{
-  // vector[N] y_rep;
-  // vector[N] y_pred;
   real theta_pred[N_pred];
   
   real par_swb;
@@ -43,22 +41,13 @@ generated quantities{
   real thetamax_swb;
   real thetaopt_swb;
   
-  // real log_lik[N];
   
-  // for(i in 1:N) log_lik[i] = bernoulli_logit_lpmf(pres[i] | theta[i]);
 
-  // for(i in 1:N){
-  //  y_rep[i] = bernoulli_rng(inv_logit(a + b_swb*swb[i] + b2_swb*square(swb[i])));
-  // }
   
-  //   for(i in 1:N){
-  //  y_pred[i] = a + b_swb*swb[i] + b2_swb*square(swb[i]);
-  // }
   
     for(i in 1:N_pred){
    theta_pred[i] = a + b_swb*swb_pred[i] + b2_swb*square(swb_pred[i]);
   }
-
 
 par_swb = -b_swb/(2*b2_swb);
     if ((min_swb <= par_swb) && (par_swb <= max_swb)){

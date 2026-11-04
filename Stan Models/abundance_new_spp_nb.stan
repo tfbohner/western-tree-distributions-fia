@@ -2,8 +2,6 @@ data{
   int<lower=1> N;
   int<lower=1> N_pred;
   vector[N] swb;
-  // vector[N] temp;
-  // vector[N] avgba;
   int abun[N];
   
   real min_swb;
@@ -19,9 +17,6 @@ parameters{
   real a;
   real b_swb;
   real b2_swb;
-  // real b_temp;
-  // real b2_temp;
-  // real b_ba;
   
   real<lower=0> phi;
   
@@ -32,7 +27,6 @@ transformed parameters{
     
   for(i in 1:N){
    eta[i] = a + b_swb*swb[i] + b2_swb*square(swb[i]);
-      // + b_temp*temp[i] + b2_temp*square(temp[i]) + b_ba*avgba[i];
   }
 }
 
@@ -41,9 +35,6 @@ model{
   
   b_swb ~ normal(0, 10);
   b2_swb ~ normal(0, 10);
-  // b_temp ~ normal(0, 10);
-  // b2_temp ~ normal(0, 10);
-  // b_ba ~ normal(0, 10);
   
   phi ~ gamma(0.01, 0.01);
   
@@ -52,7 +43,6 @@ model{
 }
 
 generated quantities{
-  // int y_rep[N];
   real eta_pred[N_pred];
   
   real wet_swb;
@@ -65,9 +55,6 @@ generated quantities{
   real n_hat_pres;
   real n_hat_opt;
   
-  // real log_lik[N];
-  // for(i in 1:N) log_lik[i] = neg_binomial_2_log_lpmf(abun[i] | eta[i], phi);
-
 
   for(i in 1:N_pred){
    eta_pred[i] = exp(a + b_swb*swb_pred[i] + b2_swb*square(swb_pred[i]));

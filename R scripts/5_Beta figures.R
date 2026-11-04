@@ -1,4 +1,8 @@
-## Visualize regression coefficients by species, traits, families etc.
+## 5_Beta figures
+## Figures of regression coefficients by species, traits and family.
+## Author: Teresa Bohner
+## Project: where western trees grow vs. where they thrive (see README)
+
 library(bbmle)
 library(ggplot2)
 library(ggpmisc)
@@ -170,34 +174,6 @@ ggplot(nbetas, aes(x=reorder(G.sp, -spid), y=X50.)) +
 dev.off()
 
 pdf("Output pdfs/param intervals growth.pdf", width =11, height=8.5)
-# ggplot(gbetas, aes(x=reorder(gensp, -spid), y=X50.)) +
-#   geom_pointrange(aes(ymin=X2.5., ymax=X97.5.), shape=20) +
-#   geom_pointrange(aes(ymin=X2.5., ymax=X97.5., alpha=signif95), color="dimgray", shape=20) +
-#   scale_alpha(range=c(1,0)) +
-#   geom_point(aes(color=param), shape=20)+
-#   geom_point(aes(alpha=signif95), color="lightgray", shape=20) +
-#   xlab("Growth\n") + ylab("Median Parameter Estimate and 95% CI") +
-#   geom_hline(aes(yintercept=0), linetype="dotted") +
-#   coord_flip() +
-#   facet_wrap(~param, ncol = 8, scales = "free_x") +
-#   theme_classic() +
-#   theme(axis.text.x = element_text(size=6))+
-#   theme(legend.position="none")
-# geom_text(data=g2signif, aes(reorder(gensp, -spid),y=pos, color=param), label = "*", size=5)
-# ggplot(gbetas, aes(x=reorder(G.sp, -spid), y=X50.)) +
-#   geom_pointrange(data=gbetas[which(gbetas$signif90==1),], 
-#                   aes(ymin=X5., ymax=X95., color=sign), shape=20) +
-#   geom_pointrange(data=gbetas[which(gbetas$signif90==0),],
-#                    aes(ymin=X5., ymax=X95.), color="lightgray", shape=20) +
-#   scale_color_manual(values = c("red3", "medium blue")) +
-#   xlab("") + ylab("Effect on Growth") + 
-#   geom_hline(aes(yintercept=0), linetype="dashed") +
-#   coord_flip() +
-#   facet_wrap(~betas, ncol = 8, scales = "free_x", labeller = pred_labeller) +
-#   theme_classic() +
-#   theme(panel.border = element_rect(size=1, fill = NA)) +
-#   theme(axis.text.x = element_text(size=6), axis.text.y = element_text(face="italic"))+
-#   theme(legend.position="none") 
 ggplot(gbetas, aes(x=reorder(G.sp, -spid), y=X50.)) +
   geom_pointrange(aes(ymin=X5., ymax=X95., color=sign, alpha=signif90), shape=16) +
   scale_color_manual(values = c("red3", "medium blue")) +
@@ -210,29 +186,9 @@ ggplot(gbetas, aes(x=reorder(G.sp, -spid), y=X50.)) +
   theme(panel.border = element_rect(size=1, fill = NA)) +
   theme(axis.text.x = element_text(size=8), axis.text.y = element_text(size=9, face="italic"))+
   theme(legend.position="none") 
-# ggplot(gbetas, aes(X50., fill=param, alpha=signif)) +
-#   geom_histogram(color="black") +
-#   geom_vline(aes(xintercept=0), linetype="dashed") +
-#   facet_wrap(~param, scales="free_x") +
-#   theme_classic() +
-#   xlab("Median parameter estimate") + ylab("Frequency") +
-#   theme(legend.position = "none")
 dev.off()
 
 pdf("Output pdfs/param intervals surv.pdf", width =11, height=8.5)
-# ggplot(sbetas, aes(x=reorder(gensp, -spid), y=X50.)) +
-#   geom_pointrange(aes(ymin=X2.5., ymax=X97.5.), shape=20) +
-#   geom_pointrange(aes(ymin=X2.5., ymax=X97.5., alpha=signif95), color="dimgray", shape=20) +
-#   scale_alpha(range=c(1,0)) +
-#   geom_point(aes(color=param), shape=20)+
-#   geom_point(aes(alpha=signif95), color="lightgray", shape=20) +
-#   xlab("Survival\n") + ylab("Median Parameter Estimate and 95% CI") + 
-#   geom_hline(aes(yintercept=0), linetype="dotted") +
-#   coord_flip() +
-#   facet_wrap(~param, ncol = 8, scales = "free_x") +
-#   theme_classic() +
-#   theme(axis.text.x = element_text(size=6))+
-#   theme(legend.position="none") 
 ggplot(sbetas, aes(x=reorder(G.sp, -spid), y=X50.)) +
   geom_pointrange(aes(ymin=X5., ymax=X95., color=sign, alpha=signif90), shape=16) +
   scale_color_manual(values = c("red3", "medium blue")) +
@@ -245,29 +201,9 @@ ggplot(sbetas, aes(x=reorder(G.sp, -spid), y=X50.)) +
   theme(panel.border = element_rect(size=1, fill = NA)) +
   theme(axis.text.x = element_text(size=8), axis.text.y = element_text(size=10, face="italic"))+
   theme(legend.position="none") 
-# ggplot(sbetas, aes(X50., fill=param, alpha=signif)) +
-#   geom_histogram(color="black") +
-#   geom_vline(aes(xintercept=0), linetype="dashed") +
-#   facet_wrap(~param, scales="free_x") +
-#   theme_classic() +
-#   xlab("Median parameter estimate") + ylab("Frequency") +
-#   theme(legend.position = "none")
 dev.off()
 
 pdf("Output pdfs/param intervals rec.pdf", width =11, height=8.5)
-# ggplot(rbetas, aes(x=reorder(gensp, -spid), y=X50.)) +
-#   geom_pointrange(aes(ymin=X2.5., ymax=X97.5.), shape=20) +
-#   geom_pointrange(aes(ymin=X2.5., ymax=X97.5., alpha=signif95), color="dimgray", shape=20) +
-#   scale_alpha(range=c(1,0)) +
-#   geom_point(aes(color=param), shape=20)+
-#   geom_point(aes(alpha=signif95), color="lightgray", shape=20) +
-#   xlab("Recruitment\n") + ylab("Median Parameter Estimate and 95% CI") + 
-#   geom_hline(aes(yintercept=0), linetype="dotted") +
-#   coord_flip() +
-#   facet_wrap(~param, ncol = 8, scales = "free_x") +
-#   theme_classic() +
-#   theme(axis.text.x = element_text(size=6))+
-#   theme(legend.position="none") 
 ggplot(rbetas, aes(x=reorder(G.sp, -spid), y=X50.)) +
   geom_pointrange(aes(ymin=X5., ymax=X95., color=sign, alpha=signif90), shape=16) +
   scale_color_manual(values = c("red3", "medium blue")) +
@@ -280,13 +216,6 @@ ggplot(rbetas, aes(x=reorder(G.sp, -spid), y=X50.)) +
   theme(panel.border = element_rect(size=1, fill = NA)) +
   theme(axis.text.x = element_text(size=8), axis.text.y = element_text(size=10, face="italic"))+
   theme(legend.position="none") 
-# ggplot(rbetas, aes(X50., fill=param, alpha=signif)) +
-#   geom_histogram(color="black") +
-#   geom_vline(aes(xintercept=0), linetype="dashed") +
-#   facet_wrap(~param, scales="free_x") +
-#   theme_classic() +
-#   xlab("Median parameter estimate") + ylab("Frequency") +
-#   theme(legend.position = "none")
 dev.off()
 
 ## regression coefficients with traits----

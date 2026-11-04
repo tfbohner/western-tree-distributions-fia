@@ -1,6 +1,8 @@
+## 4_All Vitals Stan Models
+## Fit the hierarchical Stan model for each species and response (occurrence, abundance, growth, survival, recruitment), check diagnostics, and compute optima, mismatch and demographic cost.
 ## Author: Teresa Bohner
-## Purpose: Chapter 1 analyses: Occurrence, abundance (density), and vital rate modeling
-## Date Modified: 5-8-2019
+## Project: where western trees grow vs. where they thrive (see README)
+
 library(dplyr)
 library(rstan)
 rstan_options(auto_write = TRUE)
@@ -23,8 +25,6 @@ spptable <- read.csv(paste0(data.path, 'spptable.new.csv'))
 spptable <- spptable[,c(1:2)]
 names(spptable)[2] <- "gensp"
 spptable$gensp <- as.character(spptable$gensp)
-# abundance <- rename(abundance, "cwd"="ptcoeff")
-# occurrence <- rename(occurrence, "cwd"="ptcoeff")
 
 length(unique(occurrence$plot.uniqueID))
 
@@ -95,14 +95,6 @@ for(i in 1:N_spp){
 
   
   ## Occurrence diagnostics----
-  # # extract pareto-k
-  # log_lik1 <- extract_log_lik(pa.fit, merge_chains = FALSE)
-  # rel_n_eff <- relative_eff(exp(log_lik1))
-  # loo1 <- loo(log_lik1, r_eff = rel_n_eff, cores = 2, save_psis = TRUE)
-  # # plot(loo1, label_points = TRUE)
-  # pareto_k_all$N_0.7[i] <- length(which(loo1$diagnostics$pareto_k>0.7))
-  # pareto_k_all$N_1[i] <- length(which(loo1$diagnostics$pareto_k>1))
-  # pareto_k_all$N_tot[i] <- length(loo1$diagnostics$pareto_k)
   
   ## Occurrence output----
   theta <- as.data.frame(summary(pa.fit, pars="theta_pred")$summary[, c(1,4,6,8)])
@@ -197,17 +189,12 @@ for(i in 1:N_spp){
        xlab="swb gradient", 
        ylab="pr(occurrence)")
   points(binmean.size, binmean.occur)
-  # points(swb[spp==i], jitter(pres[spp==i], 0.1))
   mtext("wet", side=1, line=2, adj=1)
   mtext("dry", side=1, line=2, adj=0)
   
   polygon(c(xdum,rev(xdum)),c(inv.logit(theta$`97.5%`[theta$spid==i]),
                               rev(inv.logit(theta$`2.5%`[theta$spid==i]))),col=trans_gray, border=NA)
   lines(xdum, inv.logit(theta$`50%`[theta$spid==i]), col=4)
-  # lines(xdum, inv.logit(fixef(pa.brms)[1] + fixef(pa.brms)[2]*swb_pred + fixef(pa.brms)[3]*swb_pred^2))
-  # 
-  # plot(inv.logit(fixef(pa.brms)[1] + fixef(pa.brms)[2]*swb_pred + fixef(pa.brms)[3]*swb_pred^2),
-  #      inv.logit(theta$`50%`[theta$spid==i]))
 
   abline(v=(maxminopt_all_mean$opt_swb_p[maxminopt_all_mean$spid==i]-xmean)/xsd, col=2, lty=2)
   abline(v=maxminopt_all_med$opt_swb_p[maxminopt_all_med$spid==i], col=4, lty=2)
@@ -272,9 +259,6 @@ eta_all <- data.frame(eta_all)
 
 med_SWBs_all <- data.frame(matrix(NA, nrow=N_spp, ncol=30))
 r2_all <- rep(NA, length=N_spp)
-# pareto_k_all <- data.frame(matrix(NA, nrow=N_spp, ncol=3))
-# pareto_k_all <- cbind(spptable, pareto_k_all)
-# names(pareto_k_all)[3:5] <- c("N_0.7", "N_1", "N_tot")
 
 abund1 <- abundance
 maxmin1 <- maxmin
@@ -351,30 +335,15 @@ for(i in 1:N_spp){
   saveRDS(nb.fit, paste(save.path, "abun models/abun.fit",i,".rds", sep=""))
 
   # ## Abundance diagnostics----
-  # posterior <- as.array(nb.fit)
-  # color_scheme_set("viridis")
-  # pdf(paste("Output pdfs/abun regression coeff/abun regression coeff", i, ".pdf", sep=""))
-  # # print(plot(loo1, label_points = TRUE))
-  # print(mcmc_intervals(posterior, pars=c("a","b_swb","b_ba","b_temp","b2_swb","b2_temp", "phi")) +
-  #         ggplot2::labs(title = spptable$gensp[i]))
-  # print(mcmc_combo(posterior, pars=c("a","b_swb","b_ba","b_temp")))
-  # print(mcmc_acf_bar(posterior, pars=c("a","b_swb","b_ba","b_temp")))
-  # print(mcmc_combo(posterior, pars=c("b2_swb","b2_temp","phi","lp__")))
-  # print(mcmc_acf_bar(posterior, pars=c("b2_swb","b2_temp","phi","lp__")))
-  # print(mcmc_rhat_hist(rhat(nb.fit)[1:7]))
-  # print(mcmc_neff_hist(neff_ratio(nb.fit)[1:7]))
-  # dev.off()
   
   posterior <- as.array(nb.fit)
   color_scheme_set("viridis")
   pdf(paste("Output pdfs/abun regression coeff/abun regression coeff", i, ".pdf", sep=""))
-  # print(plot(loo1, label_points = TRUE))
   print(mcmc_intervals(posterior, pars=c("a","b_swb","b2_swb","phi")) +
           ggplot2::labs(title = spptable$gensp[i]))
   print(mcmc_combo(posterior, pars=c("a","b_swb","b2_swb","phi")))
   print(mcmc_acf_bar(posterior, pars=c("a","b_swb","b2_swb","phi")))
   print(mcmc_rhat_hist(rhat(nb.fit)[1:4]))
-  # print(mcmc_neff_hist(neff_ratio(nb.fit)[1:4]))
   dev.off()
   
   ## Abundance output----
@@ -492,14 +461,11 @@ for(i in 1:N_spp){
        xlab="swb gradient", 
        ylab="Abundance")
   points(binmean.size, binmean.abun)
-  # points(swb[spp==i], jitter(pres[spp==i], 0.1))
   mtext("wet", side=1, line=2, adj=1)
   mtext("dry", side=1, line=2, adj=0)
   
   polygon(c(xdum,rev(xdum)),c(eta_all$`97.5%`[eta_all$spid==i],rev(eta_all$`2.5%`[eta_all$spid==i])),col=trans_gray, border=NA)
   lines(xdum, eta_all$`50%`[eta_all$spid==i], col=4)
-  # abline(v=med_SWBs_all$wet_swb[med_SWBs_all$spid==i], lwd=2)
-  # abline(v=med_SWBs_all$dry_swb[med_SWBs_all$spid==i], lwd=2)
   abline(v=med_SWBs_all$opt_swb[med_SWBs_all$spid==i], col=4, lty=2)
   
 }
@@ -559,14 +525,10 @@ for(i in 1:N_spp){
 dev.off()
 
 ## Abundance data export----
-# pareto_k_all$k_0.7_percent <- pareto_k_all$N_0.7/pareto_k_all$N_tot*100
-# pareto_k_all <- pareto_k_all[order(-pareto_k_all$k_0.7_percent),]
-# write.csv(pareto_k_all, 'grow pareto k.csv', row.names=F)
 med_SWBs_all <- bind_cols(med_SWBs_all, as.data.frame(r2_all))
 write.csv(betas_all, paste0(data.path, "abun_betas_swb_temp.csv"), row.names=F)
 write.csv(med_SWBs_all, paste0(data.path, "abunswbs_temp.csv"), row.names = F)
 save.image(paste0(save.path, "abundance loop_temp.RData"))
-
 
 
 ## Growth data manipulation----
@@ -586,10 +548,8 @@ swb_axes_p <- read.csv(paste0(data.path, 'swb_axes_p.csv'))
 swb_axes_p <- merge(swb_axes_p, spptable, by="gensp")
 trees <- read.csv(paste0(data.path, 'trees.new.csv'))
 
-# trees <- rename(trees, "cwd"="ptcoeff")
 tableinfo <- read.csv(paste0(data.path, 'tableinfo.csv'))
 
-# trees <-trees[trees$bai> -0.03&trees$bai< 0.03,]
 
 hist(trees$bai)
 trees$baicm <- trees$bai*10000
@@ -634,9 +594,6 @@ mu_all <- data.frame(mu_all)
 med_SWBs_all <- data.frame(matrix(NA, nrow=N_spp, ncol=26))
 r2_all <- rep(NA, length=N_spp)
 
-# pareto_k_all <- data.frame(matrix(NA, nrow=N_spp, ncol=3))
-# pareto_k_all <- cbind(spptable, pareto_k_all)
-# names(pareto_k_all)[3:5] <- c("N_0.7", "N_1", "N_tot")
 
 trees1 <- trees
 maxmin1 <- maxmin
@@ -722,19 +679,10 @@ for(i in 3:N_spp){
   saveRDS(grow.fit, paste(save.path, "grow models/grow.fit",i,".rds", sep=""))
   
   ## Growth diagnostics----
-  # # extract pareto-k
-  # log_lik1 <- extract_log_lik(grow.fit, merge_chains = FALSE)
-  # rel_n_eff <- relative_eff(exp(log_lik1))
-  # loo1 <- loo(log_lik1, r_eff = rel_n_eff, cores = 2, save_psis = TRUE)
-  # # plot(loo1, label_points = TRUE)
-  # pareto_k_all$N_0.7[i] <- length(which(loo1$diagnostics$pareto_k>0.7))
-  # pareto_k_all$N_1[i] <- length(which(loo1$diagnostics$pareto_k>1))
-  # pareto_k_all$N_tot[i] <- length(loo1$diagnostics$pareto_k)
 
   posterior <- as.array(grow.fit)
   color_scheme_set("viridis")
   pdf(paste("Output pdfs/growth regression coeff/grow regression coeff", i, ".pdf", sep=""))
-  # print(plot(loo1, label_points = TRUE))
   print(mcmc_intervals(posterior, pars=c("a_sp","b_dia","b_swb","b_ba","b_adcount","b_temp", "b2_dia","b2_swb","b2_temp","sigma_dia","sigma_c")) +
           ggplot2::labs(title = spptable$gensp[i]))
   print(mcmc_combo(posterior, pars=c("a_sp","b_dia","b_swb","b_ba","b_adcount","b_temp")))
@@ -742,7 +690,6 @@ for(i in 3:N_spp){
   print(mcmc_combo(posterior, pars=c("b2_dia","b2_swb","b2_temp","sigma_dia","sigma_c","lp__")))
   print(mcmc_acf_bar(posterior, pars=c("b2_dia","b2_swb","b2_temp","sigma_dia","sigma_c","lp__")))
   print(mcmc_rhat_hist(rhat(grow.fit)[2:12]))
-  # print(mcmc_neff_hist(neff_ratio(grow.fit)[2:12]))
   dev.off()
   
   ## Growth output----
@@ -754,7 +701,6 @@ for(i in 3:N_spp){
   
   if(i==1) mu_all <- mu
   if(i>1) mu_all <- rbind(mu_all, mu)
-  # mu_all[c((i*200-200+1):(i*200)),] <- mu
   
   ## betas
   betas <- as.data.frame(summary(grow.fit, pars=c("b_dia","b_swb","b_ba","b_adcount","b_temp","b2_dia","b2_swb","b2_temp"),probs = c(0.025,0.05,0.25,0.5,0.75,0.95,0.975))$summary[, c(1:10, 12)])
@@ -884,14 +830,11 @@ for(i in 1:N_spp){
        xlab="swb gradient", 
        ylab="BAI (cm^2)")
   points(binmean.size, binmean.grow)
-  # points(swb[spp==i], jitter(pres[spp==i], 0.1))
   mtext("wet", side=1, line=2, adj=1)
   mtext("dry", side=1, line=2, adj=0)
   
   polygon(c(xdum,rev(xdum)),c(mu_all$`97.5%`[mu_all$spid==i],rev(mu_all$`2.5%`[mu_all$spid==i])),col=trans_gray, border=NA)
   lines(xdum, mu_all$`50%`[mu_all$spid==i], col=4)
-  # abline(v=med_SWBs_all$wet_swb[med_SWBs_all$spid==i], lwd=2)
-  # abline(v=med_SWBs_all$dry_swb[med_SWBs_all$spid==i], lwd=2)
   abline(v=med_SWBs_all$opt_swb[med_SWBs_all$spid==i], col=4, lty=2)
   
 }
@@ -907,7 +850,6 @@ for(i in 1:N_spp){
   ydum <- seq((min(mu_all$`50%`[mu_all$spid==i])-10),(max(mu_all$`50%`[mu_all$spid==i])+10), length.out=length(xdum))
   
   x2dum <- sort(swb_axes_p$swb_pred[swb_axes_p$spid==i])
-  # y2dum <- seq(0,(max(eta$mean[eta$spid==i])+10), length.out=length(xdum))
   y2dum <- seq(0,1, length.out=length(xdum))
   lowlim <- ifelse(med_SWBs_all$pres_swb[med_SWBs_all$spid==i]<med_SWBs_all$dry_swb[med_SWBs_all$spid==i], 
                    med_SWBs_all$pres_swb[med_SWBs_all$spid==i],
@@ -951,9 +893,6 @@ for(i in 1:N_spp){
 dev.off()
 
 ## Growth data export----
-# pareto_k_all$k_0.7_percent <- pareto_k_all$N_0.7/pareto_k_all$N_tot*100
-# pareto_k_all <- pareto_k_all[order(-pareto_k_all$k_0.7_percent),]
-# write.csv(pareto_k_all, 'grow pareto k.csv', row.names=F)
 write.csv(betas_all, paste0(data.path, "grow_betas_swb_temp.csv"), row.names=F)
 
 med_SWBs_all <- bind_cols(med_SWBs_all, as.data.frame(r2_all))
@@ -970,10 +909,7 @@ rm(list = ls())
 # read in data
 spptable <- na.omit(read.csv(paste0(data.path, 'spptable.new.csv'))[,c(1,5)])
 names(spptable)[2] <- "gensp"
-# spptable <- subset(spptable, gensp=="Pinus monophylla")
-# spptable$spid <- 1
 spptable$gensp <- as.character(spptable$gensp)
-#spptable <- spptable[1:5,]
 maxminopt <- read.csv(paste0(data.path, 'distromaxminopt_swb.csv'))
 maxminopt <- merge(maxminopt, spptable, by="gensp")
 theta <- read.csv(paste0(data.path, 'theta_swb.csv'))
@@ -1012,7 +948,6 @@ length(which(surv2$chiscore=="TRUE"))/nrow(surv2)
 length(which(surv2$outlier=="yes"))#/nrow(surv2)
 
 surv3 <- subset(surv2, outlier=="yes")
-# surv <- surv2
 
 maxmin <- dplyr::group_by(surv, spid)%>%
   dplyr::summarise(min_swb = min(ptcoeff, na.rm=T),
@@ -1027,9 +962,6 @@ med_SWBs_all <- data.frame(matrix(NA, nrow=N_spp, ncol=26))
 
 r2_all <- rep(NA, length=N_spp)
 
-# pareto_k_all <- data.frame(matrix(NA, nrow=N_spp, ncol=3))
-# pareto_k_all <- cbind(spptable, pareto_k_all)
-# names(pareto_k_all)[3:5] <- c("N_0.7", "N_1", "N_tot")
 
 surv1 <- surv
 maxmin1 <- maxmin
@@ -1101,18 +1033,9 @@ for(i in 1:N_spp){
   saveRDS(surv.fit, paste(save.path, "surv models/surv.fit",i,".rds", sep=""))
   
   ## Survival diagnostics----
-  # # extract pareto-k
-  # log_lik1 <- extract_log_lik(surv.fit, merge_chains = FALSE)
-  # rel_n_eff <- relative_eff(exp(log_lik1))
-  # loo1 <- loo(log_lik1, r_eff = rel_n_eff, cores = 2, save_psis = TRUE)
-  # # plot(loo1, label_points = TRUE)
-  # pareto_k_all$N_0.7[i] <- length(which(loo1$diagnostics$pareto_k>0.7))
-  # pareto_k_all$N_1[i] <- length(which(loo1$diagnostics$pareto_k>1))
-  # pareto_k_all$N_tot[i] <- length(loo1$diagnostics$pareto_k)
   posterior <- as.array(surv.fit)
   color_scheme_set("viridis")
   pdf(paste("Output pdfs/surv regression coeff/surv regression coeff", i, ".pdf", sep=""))
-  # print(plot(loo1, label_points = TRUE))
   print(mcmc_intervals(posterior, pars=c("a_sp","b_dia","b_swb","b_ba","b_adcount","b_temp", "b2_dia","b2_swb","b2_temp","sigma_c")) +
           ggplot2::labs(title = spptable$gensp[i]))
   print(mcmc_combo(posterior, pars=c("a_sp","b_dia","b_swb","b_ba","b_adcount","b_temp")))
@@ -1120,7 +1043,6 @@ for(i in 1:N_spp){
   print(mcmc_combo(posterior, pars=c("b2_dia","b2_swb","b2_temp","sigma_c","lp__")))
   print(mcmc_acf_bar(posterior, pars=c("b2_dia","b2_swb","b2_temp","sigma_c","lp__")))
   print(mcmc_rhat_hist(rhat(surv.fit)[1:10]))
-  # print(mcmc_neff_hist(neff_ratio(surv.fit)[1:10]))
   dev.off()
 
   ## Survival output----
@@ -1257,16 +1179,12 @@ for(i in 1:N_spp){
        xlab="swb gradient", 
        ylab="survival")
   points(binmean.size, binmean.surv)
-  # points(swb[spp==i], jitter(pres[spp==i], 0.1))
   mtext("wet", side=1, line=2, adj=1)
   mtext("dry", side=1, line=2, adj=0)
   
   polygon(c(xdum,rev(xdum)),c(inv.logit(pr_all$`97.5%`[pr_all$spid==i]),rev(inv.logit(pr_all$`2.5%`[pr_all$spid==i]))),col=trans_gray, border=NA)
   lines(xdum, inv.logit(pr_all$`50%`[pr_all$spid==i]), col=4)
-  # abline(v=med_SWBs_all$wet_swb[med_SWBs_all$spid==i], lwd=2)
-  # abline(v=med_SWBs_all$dry_swb[med_SWBs_all$spid==i], lwd=2)
   abline(v=med_SWBs_all$opt_swb[med_SWBs_all$spid==i], col=4, lty=2)
-  # lines(xdum, inv.logit(fixef(fit.bern)[1] + fixef(fit.bern)[3]*swb_pred + fixef(fit.bern)[8]*swb_pred^2))
 
 }
 dev.off()
@@ -1311,9 +1229,6 @@ for(i in 1:N_spp){
 dev.off()
 
 ## Survival data export----
-# pareto_k_all$k_0.7_percent <- pareto_k_all$N_0.7/pareto_k_all$N_tot*100
-# pareto_k_all <- pareto_k_all[order(-pareto_k_all$k_0.7_percent),]
-# write.csv(pareto_k_all, 'surv pareto k.csv', row.names=F)
 med_SWBs_all <- bind_cols(med_SWBs_all, as.data.frame(r2_all))
 write.csv(med_SWBs_all, paste0(data.path, 'survswbs_temp.csv'), row.names = F)
 write.csv(betas_all, paste0(data.path, 'surv_betas_swb_temp.csv'), row.names=F)
@@ -1323,7 +1238,6 @@ remove(surv.fit)
 save.image(paste0(save.path, 'survival model_temp.RData'), compress=T)
 
 
-
 ## Recruitment data manipulation----
 # *Clear workspace to start 
 rm(list = ls())
@@ -1331,7 +1245,6 @@ rm(list = ls())
 spptable <- na.omit(read.csv(paste0(data.path, 'spptable.new.csv'))[,c(1,6)])
 names(spptable)[2] <- "gensp"
 ## subset for debugging
-# spptable <- subset(spptable, spid%in%c(1:2))
 
 maxminopt <- read.csv(paste0(data.path, 'distromaxminopt_swb.csv'))
 maxminopt <- merge(maxminopt, spptable, by="gensp")
@@ -1344,7 +1257,6 @@ swb_axes_p <- merge(swb_axes_p, spptable, by="gensp")
 growswbs <- read.csv(paste0(data.path, 'growswbs_temp.csv'))
 survswbs <- read.csv(paste0(data.path, 'survswbs_temp.csv'))
 recruits <- dplyr::select(read.csv(paste0(data.path, 'recruits.new.csv')), -spid)
-# recruits <- rename(recruits, "cwd"="ptcoeff")
 tableinfo <- read.csv(paste0(data.path, 'tableinfo.csv'))
 
 recruits <- merge(recruits, spptable)
@@ -1373,7 +1285,6 @@ length(which(rec2$chiscore=="TRUE"))#/nrow(rec2)
 length(which(rec2$chiscore=="TRUE"))/nrow(rec2)
 length(which(rec2$outlier=="yes"))#/nrow(rec2)
 
-# recruits <- subset(rec2, chiscore!="TRUE")
 
 tableinfo_rec <- dplyr::group_by(recruits, gensp) %>%
   dplyr::summarize(nplots_r = length(unique(plot.uniqueID)),
@@ -1450,21 +1361,6 @@ recruit.fit<- sampling(
 saveRDS(recruit.fit, paste0(save.path, "recruit_mod_stan.rds"))
 
 ## Recruitment diagnostics----
-# log_lik1 <- extract_log_lik(recruit.fit, merge_chains = FALSE)
-# rel_n_eff <- relative_eff(exp(log_lik1))
-# loo1 <- loo(log_lik1, r_eff = rel_n_eff, cores = 2, save_psis = TRUE)
-# # plot(loo1, label_points = TRUE)
-# 
-# pareto_k_all <- dplyr::select(recruits, c(spid, gensp, N.sdlgs, ptcoeff))
-# 
-# pareto_k_all$pareto_k <- loo1$diagnostics$pareto_k
-# 
-# pareto_k_spp <- group_by(pareto_k_all, spid) %>%
-#   summarize(gensp = first(gensp),
-#             N_0.7 = length(which(pareto_k>0.7)),
-#             N_1 = length(which(pareto_k>1)),
-#             N_tot = length(pareto_k),
-#             k_0.7_percent = N_0.7/N_tot*100)
 
 inits <- get_inits(recruit.fit)
 inits_chain1 <- inits[[1]]
@@ -1493,8 +1389,6 @@ for(i in 1:N_spp){
   print(mcmc_acf_bar(posterior, pars=pars1))
   print(mcmc_combo(posterior, pars=c(pars2, "lp__")))
   print(mcmc_acf_bar(posterior, pars=c(pars2, "lp__")))
-  # print(mcmc_rhat_hist(rhat(grow.fit)[1:9]))
-  # print(mcmc_neff_hist(neff_ratio(grow.fit)[1:9]))
 }
 dev.off()
 

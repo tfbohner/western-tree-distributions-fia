@@ -14,7 +14,6 @@ data {
   real min_swb;
   real max_swb;
   real pres_swb_dat;
-  // real abun_swb_dat;
 }
 
 parameters {
@@ -70,7 +69,6 @@ generated quantities{
   real wet_swb;
   real dry_swb;
   real pres_swb;
-  // real abun_swb;
   real par_swb;
   real opt_swb;
   real g_hat_wet;
@@ -91,7 +89,6 @@ generated quantities{
     dry_swb = min_swb;
     wet_swb = max_swb;
     pres_swb = pres_swb_dat;
-    // abun_swb = abun_swb_dat;
     par_swb = -b_swb/(2*b2_swb);
     if ((par_swb <= wet_swb) && (par_swb >= dry_swb)){
       opt_swb = par_swb;
@@ -103,7 +100,6 @@ generated quantities{
     g_hat_wet = a_sp + b_swb*wet_swb + b2_swb*square(wet_swb);
     g_hat_dry = a_sp + b_swb*dry_swb + b2_swb*square(dry_swb);
     g_hat_pres = a_sp + b_swb*pres_swb + b2_swb*square(pres_swb);
-    // g_hat_abun = a_sp + b_swb*abun_swb + b2_swb*square(abun_swb);
     g_hat_opt = a_sp + b_swb*opt_swb + b2_swb*square(opt_swb);
 
 }

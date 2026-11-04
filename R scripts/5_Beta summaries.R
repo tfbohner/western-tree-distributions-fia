@@ -1,4 +1,8 @@
-## FIA regression coefficient summaries with traits
+## 5_Beta summaries
+## Summaries of regression coefficients joined to species traits.
+## Author: Teresa Bohner
+## Project: where western trees grow vs. where they thrive (see README)
+
 library(tidyverse)
 library(data.table)
 library(reshape2)
@@ -120,7 +124,6 @@ ssignif <- group_by(sbetas, vr, param) %>%
             nsignif = length(which(signif90==1)),
             npos = length(which(signif90==1&X50.>0)),
             nneg = length(which(signif90==1&X50.<0)))
-
 
 
 rbetas <- read.csv(paste0(data.path, "rec_betas_swb_temp.csv"))

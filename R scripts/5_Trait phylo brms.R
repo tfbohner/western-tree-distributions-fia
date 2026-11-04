@@ -1,6 +1,7 @@
-### Description: LOO model selection for phylogenetic regressions, trait figure
-### Author: Teresa Bohner
-### Date modified: 21 Feb 2019
+## 5_Trait phylo brms
+## Phylogenetic regressions (brms) of mismatch and cost on traits, with LOO model selection, and the trait figure.
+## Author: Teresa Bohner
+## Project: where western trees grow vs. where they thrive (see README)
 
 ## packages----
 library(tidyverse)
@@ -104,8 +105,6 @@ bform2 <- bf(response ~ (1|phylo_gensp) + mi(wood_density)  +  mi(sla_value) + m
 fit_abun2 <- brm(bform2, data = abun.data2, cov_ranef = list(phylo_gensp=A), control = list(adapt_delta=0.99, max_treedepth = 12))
 fit_abun3 <- brm(bform2, data = abun.data2, control = list(adapt_delta=0.99, max_treedepth = 14))
 
-# plot(fit_abun, N = 2, ask = FALSE)
-# plot(marginal_effects(fit_abun), points = TRUE) 
 hyp <- "sd_phylo_gensp__response_Intercept^2 / (sd_phylo_gensp__response_Intercept^2 + sigma_response^2) = 0"
 (hyp <- hypothesis(fit_abun, hyp, class = NULL))
 plot(hyp)
@@ -160,7 +159,6 @@ hyp <- "sd_phylo_gensp__response_Intercept^2 / (sd_phylo_gensp__response_Interce
 plot(hyp)
 
 lambdas <- rbind(lambdas, c("2growth", hyp$hypothesis$Estimate))
-# lambdas$lambda <- hyp$hypothesis$Estimate
 
 
 loo.0 <- loo(fit_grow, resp = "response")

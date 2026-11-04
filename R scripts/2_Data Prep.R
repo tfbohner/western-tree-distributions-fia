@@ -1,11 +1,10 @@
+## 2_Data Prep
+## Prepare analysis-ready datasets: species filters, most recent surveys, repeat-visit plots, and the species index table for Stan.
 ## Author: Teresa Bohner
-## Purpose: Chapter 1 analyses: Data preparation for analyses
-## Date Modified: 2-24-2019
+## Project: where western trees grow vs. where they thrive (see README)
 
-## change tree.table 25 to be based off of abundance
 
 library(tidyverse)
-rm(list=ls(all=TRUE))
 
 
 ## read in processed FIA data
@@ -43,8 +42,6 @@ plot(plot.table$ptcoeff~plot.table$elev)
 plot(plot.table$temp~plot.table$elev)
 boxplot(plot.table$ptcoeff~plot.table$physio_cat, ylab='SWB', xlab='Physiographic code from FIA')
 
-# trees <- merge(trees, wood[,c(3,4)], by.x = "gensp", by.y = "Binomial")
-# names(trees)[43]<-"wood_dens"
 ## ba to basal area increment (still in m^2)
 trees <- rename(trees, bai=BA.grwth)
 sdlg.data$recPC <- sdlg.data$N.sdlgs/(sdlg.data$adcount.s + 1)
@@ -95,14 +92,9 @@ tree.table4 <- summarise(temp,
 tree.table5 <- group_by(R0, gensp) %>%
   summarise(Num.plots = sum(pres, na.rm=T))
 
-# tree.table <- as.data.frame(tree.table3)
-# tree.table$mean.density <- round(tree.table$Num.trees / tree.table$Num.plots, 1)
-# tree.table <- tree.table[order(tree.table$Num.trees, decreasing=TRUE),]
-# head(tree.table); dim(tree.table)
 ## do we want to take out any spp.??
 ## omit spp without distribution models
 species.table25.n <- droplevels(subset(tree.table1, tree.table1$Num.plots>=25))
-# species.table25.n1 <- species.table25.n[-grep("spp.",species.table25.n$gensp),]
 species.table25.n <- species.table25.n[-grep("Tree",species.table25.n$gensp),]
 
 dropped <- droplevels(subset(tree.table1, tree.table1$Num.plots<25))
@@ -165,7 +157,5 @@ write.csv(trees, paste0(data.path, "trees.csv"), row.names = F)
 write.csv(surv, paste0(data.path, "surv.csv"), row.names = F)
 write.csv(recruits, paste0(data.path, "recruits.csv"), row.names = F)
 write.csv(spptable, paste0(data.path, "spptable.csv"), row.names = F)
-
-
 
 

@@ -1,4 +1,7 @@
-## FIA cost and mismatch summaries 
+## 5_Mismatch summaries
+## Summaries of mismatch and demographic cost.
+## Author: Teresa Bohner
+## Project: where western trees grow vs. where they thrive (see README)
 
 library(tidyverse)
 library(data.table)
@@ -15,8 +18,6 @@ rSWBs <- read.csv(paste0(data.path, 'recswbs_temp.csv'))
 nSWBs <- read.csv(paste0(data.path, 'abunswbs_temp.csv'))[, c(1:22, 31)]
 
 ## Remove species with unreliable model predictions here not later
-# reclist <- c("Fraxinus latifolia","Larix lyallii","Pinus attenuata")
-# rSWBs <- subset(rSWBs, !(gensp%in%reclist))
 
 
 ## Get columns ready for long-format join
@@ -31,15 +32,6 @@ nSWBs <- rename(nSWBs, "vr_swb"="opt_swb", "vr_hat_abun"="n_hat_opt", "vr_hat_pr
                 "vr_hat_wet"="n_hat_wet", "vr_hat_dry"="n_hat_dry", "vr_hat_opt"="n_hat_opt")
 
 ## Adjust debated species names
-# sSWBs$gensp <- sub("Lithocarpus","Notholithocarpus",sSWBs$gensp)
-# sSWBs$gensp <- sub("Chamaecyparis nootkatensis","Callitropsis nootkatensis",sSWBs$gensp)
-# sSWBs$gensp <- sub("Abies shastensis","Abies magnifica var. shastensis",sSWBs$gensp)
-# gSWBs$gensp <- sub("Lithocarpus","Notholithocarpus",gSWBs$gensp)
-# gSWBs$gensp <- sub("Chamaecyparis nootkatensis","Callitropsis nootkatensis",gSWBs$gensp)
-# gSWBs$gensp <- sub("Abies shastensis","Abies magnifica var. shastensis",gSWBs$gensp)
-# rSWBs$gensp <- sub("Lithocarpus","Notholithocarpus",rSWBs$gensp)
-# rSWBs$gensp <- sub("Chamaecyparis nootkatensis","Callitropsis nootkatensis",rSWBs$gensp)
-# rSWBs$gensp <- sub("Abies shastensis","Abies magnifica var. shastensis",rSWBs$gensp)
 ## Get individual vr datasets to have same spid as longest (surv) for ordering in plots
 gSWBs <- dplyr::select(gSWBs,-spid) %>%
   merge(dplyr::select(nSWBs, spid, gensp), by="gensp", all=T)
@@ -119,13 +111,11 @@ mismatch_summary <- group_by(meanmismatch_spp, no_vitals) %>%
             mix = length(which(sign=="mix")))
 
 
-
 meanmismatch_vr <- group_by(SWBs, vr)%>%
   summarize(mean_mis_p = mean(mismatch_p, na.rm = T),
             sd_mis_p = sd(mismatch_p, na.rm=T), 
             min_mis_p = min(mismatch_p, na.rm = T),
             max_mis_p = max(mismatch_p, na.rm = T),
-            # pvalue = t.test(mismatch_p)$p.value
             med_mis_p = median(mismatch_p, na.rm=T),
             n_pos_mis = length(which(mismatch_p>0)),
             n_neg_mis = length(which(mismatch_p<0)),
@@ -137,7 +127,6 @@ abs_meanmismatch_vr <- group_by(SWBs, vr)%>%
             sd_mis_p = sd(abmis_p, na.rm=T), 
             min_mis_p = min(abmis_p, na.rm = T),
             max_mis_p = max(abmis_p, na.rm = T),
-            # pvalue = t.test(mismatch_p)$p.value
             med_mis_p = median(abmis_p, na.rm=T)
   )
 

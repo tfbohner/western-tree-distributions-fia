@@ -6,6 +6,14 @@ Do tree species occur most often in the places where they actually grow, survive
 
 Published as: Bohner, T. & Diez, J. (2020). Extensive mismatches between species distributions and performance depend on functional traits. *Ecology Letters* 23(1): 33–44. [doi:10.1111/ele.13396](https://doi.org/10.1111/ele.13396)
 
+## Where to start
+
+If you're here to see how the modeling works, these three files are the core:
+
+- [`Stan Models/surv_swb_temp_spp.stan`](Stan%20Models/surv_swb_temp_spp.stan): hierarchical survival model with plot-level intercepts; `generated quantities` computes each species' optimum along the drought gradient
+- [`R scripts/4_All Vitals Stan Models.R`](R%20scripts/4_All%20Vitals%20Stan%20Models.R): fits the models species by species, checks convergence, and derives mismatch and demographic cost
+- [`R scripts/5_Trait phylo brms.R`](R%20scripts/5_Trait%20phylo%20brms.R): phylogenetic regressions of mismatch and cost on traits, with LOO model selection
+
 ## At a glance
 
 | | |

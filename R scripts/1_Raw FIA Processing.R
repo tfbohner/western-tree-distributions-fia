@@ -1,4 +1,7 @@
-## Purpose: Assemble FIA data into workable format, assemble CSVs for analyses
+## 1_Raw FIA Processing
+## Assemble raw FIA tree, seedling and plot tables into analysis datasets and attach climate values.
+## Author: Teresa Bohner
+## Project: where western trees grow vs. where they thrive (see README)
 
 # Major steps & filtering
 #  FILTER: Drop records with contradictory data for trees (e.g. multiple azimuth, distances, spcd)
@@ -19,7 +22,6 @@
 ## Plot = 4 x 168 m2 = 672 m2.   =  approx 26 x 26 meter square area
 
 
-rm(list=ls(all=TRUE))
 library(reshape2)
 library(dplyr)
 library(data.table)
@@ -63,38 +65,11 @@ ptcoeff.fia <- read.xls("Raw Data/From FIA/alpha_extractvalu.xlsx")
 temp.fia <- read.xls("Raw Data/From FIA/temp_vals_realloc.xlsx")
 temp.fia$temp_rnd <- ifelse(temp.fia$temp_rnd==-9999, NA, temp.fia$temp_rnd)
 
-# ptcoeff <- raster( "Raw Data/Global Soil-Water Balance/ALPHA/alpha/hdr.adf")
 ptcoeff.fia$fia.ID <- with(ptcoeff.fia, paste(STATECD, COUNTYCD, PLOT_FIADB, sep='.'))
 temp.fia$fia.ID <- with(temp.fia, paste(STATECD, COUNTYCD, PLOT_FIADB, sep='.'))
 climate.fia <- merge(ptcoeff.fia, dplyr::select(temp.fia, c(fia.ID, temp_rnd)), by="fia.ID", all=T)
 climate.fia <- rename(climate.fia, ptcoeff=RASTERVALU, temp=temp_rnd)
 
-
-# t1 <- raster("Raw Data/wc2.0_30s_tavg/wc2.0_30s_tavg_01.tif")
-# t2 <- raster("Raw Data/wc2.0_30s_tavg/wc2.0_30s_tavg_02.tif")
-# t3 <- raster("Raw Data/wc2.0_30s_tavg/wc2.0_30s_tavg_03.tif")
-# t4 <- raster("Raw Data/wc2.0_30s_tavg/wc2.0_30s_tavg_04.tif")
-# t5 <- raster("Raw Data/wc2.0_30s_tavg/wc2.0_30s_tavg_05.tif")
-# t6 <- raster("Raw Data/wc2.0_30s_tavg/wc2.0_30s_tavg_06.tif")
-# t7 <- raster("Raw Data/wc2.0_30s_tavg/wc2.0_30s_tavg_07.tif")
-# t8 <- raster("Raw Data/wc2.0_30s_tavg/wc2.0_30s_tavg_08.tif")
-# t9 <- raster("Raw Data/wc2.0_30s_tavg/wc2.0_30s_tavg_09.tif")
-# t10 <- raster("Raw Data/wc2.0_30s_tavg/wc2.0_30s_tavg_10.tif")
-# t11 <- raster("Raw Data/wc2.0_30s_tavg/wc2.0_30s_tavg_11.tif")
-# t12 <- raster("Raw Data/wc2.0_30s_tavg/wc2.0_30s_tavg_12.tif")
-# 
-# temp <- stack(t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12)
-# 
-# states1 <-  states[states$NAME=="California"|states$NAME=="Oregon"|states$NAME=="Washington",]
-# states.f <- fortify(states1, regions="STUSPS")
-# 
-# temp1 <- crop(temp, states1)
-# avgtemp <- mean(temp1)
-
-# writeRaster(avgtemp, "Raw Data/wc2.0_30s_tavg/wc2.0_30s_tavg_annual_PNW.tif")
-
-# plots.raw$LAT <- signif(plots.raw$LAT,3)
-# plots.raw$LON <- signif(plots.raw$LON,4)
 
 trees.raw$plot.uniqueID <- with(trees.raw, paste(STATECD, UNITCD, COUNTYCD, PLOT, sep='.'))
 trees.raw$fia.ID <- with(trees.raw, paste(STATECD, COUNTYCD, PLOT, sep='.'))
@@ -115,34 +90,12 @@ plots.sub2 <- subset(plots.raw, select=c(fia.ID,LAT,CN,LON,ELEV,MEASYEAR,MANUAL,
 plots.sub3 <- subset(plots.raw, select=c(fia.ID,STATECD,COUNTYCD,PLOT,CN,MEASYEAR,MANUAL))
 cond.sub <- subset(cond.raw, select=c(plot.uniqueID, CN, PLT_CN, INVYR, STDAGE, CONDPROP_UNADJ, TRTCD1, TRTCD2, TRTCD3, STDORGCD, PHYSCLCD, DSTRBCD1, AFFORESTATION_CD, PREV_AFFORESTATION_CD))
 cond.sub2 <- subset(cond.raw, select=c(fia.ID, CN, PLT_CN, INVYR, STDAGE, CONDPROP_UNADJ, TRTCD1, TRTCD2, TRTCD3, STDORGCD, PHYSCLCD, DSTRBCD1, AFFORESTATION_CD, PREV_AFFORESTATION_CD))
-# plots.for.fia.people <- subset(plots.raw, select=c(plot.uniqueID, STATECD, INVYR, UNITCD, COUNTYCD, PLOT, LAT, LON))
-# plots.ptcoeff <- merge(plots.sub2, ptcoeff.fia, by="fia.ID", all.x=T)
 plots.climate <- merge(plots.sub2, climate.fia, by="fia.ID", all.x=T)
 
-# plots.for.john <- subset(plots.sub3, !fia.ID%in%ptcoeff.fia$fia.ID)
-# plots.for.john2 <- subset(trees.sub3, !fia.ID%in%ptcoeff.fia$fia.ID)
-# plots.for.john2 <- distinct(plots.for.john2, fia.ID, .keep_all=TRUE)
-# 
-# write.csv(plots.for.john[2:7], "plots with no match.csv", row.names = F)
-# write.csv(plots.for.john[2:4], "plots with tree records no match.csv", row.names=F)
-# plots.no.ptcoeff.fia <- subset(plots.ptcoeff, is.na(RASTERVALU))
-
-
-# plots.ptcoeff <- merge(plots.sub2, ptcoeff.fia, by="fia.ID")
-# plots.ptcoeff <- rename(plots.ptcoeff, ptcoeff=RASTERVALU)
-# xy_co <- plots.ptcoeff[,c(4,2)]
-# plots.ptcoeff$temp <- extract(avgtemp, xy_co) 
 
 trees.sub <- subset(trees.sub, STATUSCD>0)   # 1=Live tree;  2=Dead tree;  3=Removed tree    0=not in current survey
 trees.sub2 <- subset(trees.sub2, STATUSCD>0)
 
-# xy_co <- plots.sub[,c(4,2)]
-# plots.sub$ptcoeff <- extract(ptcoeff, xy_co)
-# plots.sub$temp <- extract(avgtemp, xy_co)
-
-
-# xy_co <- plots.for.fia.people[,c(8,7)]
-# plots.for.fia.people$ptcoeff <- extract(ptcoeff, xy_co)
 
 plot.cond.yrs <- merge(plots.climate, cond.sub2, by='fia.ID', all.x=T)
 cond.short <- dplyr::select(cond.sub2, c('fia.ID', 'CONDPROP_UNADJ','STDORGCD', 'PHYSCLCD', 'TRTCD1', 'TRTCD2')) %>%
@@ -180,7 +133,6 @@ sdlgs.sub$fia.ID.y=NULL
 plots.sub <- subset(plots.climate, duplicated(plots.climate$fia.ID)==FALSE, drop=TRUE)
 
 write.table(plots.sub, "Processed Data/plots.sub.csv", sep=",", eol="\n", quote=FALSE, row.names=F)
-
 
 
 ######################## Adults----
@@ -230,12 +182,8 @@ length(which(check$rm>1))
 #  Dropping:
 #  When azimuth difference btw years is greater than 5 and less than 355 (4843)
 #  When distance difference btw years is greater than 10 cm
-# droptable <- subset(check, spcd>1 | (d.az>5 & d.az<355) | d.dist>10)
-# droplist <- as.list(droptable$tree.uniqueID)
 
 #  FILTER 1: Drop records with contradictory data for trees (e.g. multiple azimuth, distances) ----
-# trees.tb <- subset(trees, !(tree.uniqueID %in% droplist), drop=TRUE )
-# trees.tb <- trees.tb[,c(1:3, 5:22)]
 
 #  We want a single value for azimuth and distance.  For now I will keep min values for ease
 #  We might want to change this to an average (weird for azimuth becasue 0 and 360 are the same)
@@ -243,7 +191,6 @@ length(which(check$rm>1))
 # trees.tb <- ddply(trees.tb, .(tree.uniqueID), mutate,
 #                   AZIMUTH = min(AZIMUTH, na.rm=T),
 #                   DIST = min(DIST, na.rm=T))
-# temp <- group_by(trees, tree.uniqueID)
 # trees <- mutate(temp, 
 #                    AZIMUTH = min(AZIMUTH, na.rm=TRUE),
 #                    DIST = min(DIST, na.rm=TRUE))
@@ -257,7 +204,6 @@ trees.dt[ , visit := 1:.N, by = "tree.uniqueID"]   # .N gives total number withi
 trees <- data.frame(trees.dt)
 
 # MOVED FILTER: subset to include only trees with multiple measurement years
-#trees.tb <- subset(trees.tb, repmeas>1)  # do this later for the growth data only
 
 trees$STATUSCD[trees$STATUSCD==2] <- 0   # dead trees
 
@@ -354,23 +300,10 @@ trees.2$htNext <- NA
 
   
 ## most recent data max(repmeas)=2
-# trees.3 <- subset(trees, repmeas==3)
-# trees.3$yearNext <- rep(NA, nrow(trees.3))
-# trees.3$statusNext <- rep(NA, nrow(trees.3))
-# trees.3$diaNext <- rep(NA, nrow(trees.3))
-# trees.3$htNext <- rep(NA, nrow(trees.3))
 # 
-# n.visits <- c(1,2)
 # for(i in 1:length(n.visits)){
-#   trees.3$yearNext[trees.3$visit==n.visits[i]] = trees.3$MEASYEAR[trees.3$visit==n.visits[i]+1]
-#   trees.3$statusNext[trees.3$visit==n.visits[i]] = trees.3$STATUSCD[trees.3$visit==n.visits[i]+1]
-#   trees.3$diaNext[trees.3$visit==n.visits[i]] = trees.3$DIA[trees.3$visit==n.visits[i]+1]
-#   trees.3$htNext[trees.3$visit==n.visits[i]] = trees.3$HT[trees.3$visit==n.visits[i]+1]
 # }
 
-## Check
-# tt <- as.numeric(as.factor(trees.3$tree.uniqueID))
-# table(tt - rep(seq(1:max(tt)),each=3))
 
 trees.all <- rbind(trees.1, trees.2) #, trees.3
 
@@ -392,23 +325,6 @@ trees.all <- group_by(trees.all, fia.ID, year)%>%
          adcount = length(tree.uniqueID[status==1&dia>=5]),
          avgba = mean(ba[status==1&dia>=5], na.rm=T))
 
-# densfactor <- group_by(trees.all,fia.ID, gensp, year)
-# plot.densities <- summarize(densfactor,
-#                             adba.s = sum(ba[status==1&dia>=5], na.rm=TRUE),
-#                             smba.s = sum(ba[status==1&dia<5], na.rm=TRUE),
-#                             adcount.s = length(tree.uniqueID[status==1&dia>=5]),
-#                             smcount.s = length(tree.uniqueID[status==1 & dia<5]))
-# ## Scale up small ind's and combine for density in factors (Accounting for different plot sizes for seedlings)
-# # scaleupf <- (24^2*pi)/(6.8^2*pi)
-# # plot.densities$totba.consp <- plot.densities$adba+plot.densities$smba*scaleupf
-# # plot.densities$totcount.consp <- plot.densities$adcount+round(plot.densities$smcount*scaleupf)
-# 
-# plot.densities2 <- group_by(plot.densities, fia.ID, year) %>%
-#   mutate(totba = sum(adba.s, na.rm=T),
-#          adcount = sum(adcount.s, na.rm=T))
-# 
-# 
-# trees.all <- merge(trees.all, plot.densities2, by=c('fia.ID', 'gensp','year'))
 
 trees.all$plotyear <- paste(trees.all$fia.ID, trees.all$year, sep='.')
 
@@ -420,7 +336,6 @@ trees.all$alive <- NA; trees.all$surv <- NA
 trees.all$alive <- ifelse(trees.all$status==1 , 1, 0)
 trees.all$surv <- ifelse(trees.all$status==1 & trees.all$statusNext==1, 1, 
                          ifelse(trees.all$status==1 & trees.all$statusNext==0, 0, NA))  # ! Is this the right thing to do?
-
 
 
 ## Survival data ----
@@ -469,10 +384,8 @@ table(trees.all$alive)
 test <-trees.all[is.na(trees.all$surv)==TRUE & trees.all$repmeas==2,]
 
 
-
 ## Write All tree data - used for survival and growth ----
 write.csv(trees.all, file='Processed Data/All.Treedata.csv', row.names = F)
-
 
 
 ################# Seedlings----
@@ -480,7 +393,6 @@ sdlgs.sub2 <- merge(sdlgs.sub, sp.ref, by='SPCD')
 sdlgs.sub2$gensp <- paste(sdlgs.sub2$GENUS,sdlgs.sub2$SPECIES,sep=' ')
 sdlgs.sub2 <- rename(sdlgs.sub2, year=MEASYEAR)
 head(sdlgs.sub2)
-
 
 
 # TREECOUNT_CALC
@@ -553,19 +465,12 @@ r1 <- sdlg.full
 r1$pres <- ifelse(r1$N.sdlgs==0, 0, 1)
 
 length(which(r1$pres==1&r1$adcount==0))
-# test <- subset(r1, adcount==0&pres==1)
-# test2 <- merge(test, abundance, by=c("fia.ID", "gensp"))
-# r1 <- subset(r1, adcount>0|pres==1)
 
 presence <- subset(occurrence, pres==1)
 presence <- rename(presence, ad.pres=pres)
 r1 <- merge(r1, presence[1:3], by=c("fia.ID","gensp"), all.x=T)
 length(which(r1$pres==1&r1$adcount==0))
 
-# r2$adba.s <- ifelse(is.na(r2$adba.s),0,r2$adba.s)
-# r2$smba.s <- ifelse(is.na(r2$smba.s),0,r2$smba.s)
-# r2$adcount.s <- ifelse(is.na(r2$adcount.s),0,r2$adcount.s)
-# r2$smcount.s <- ifelse(is.na(r2$smcount.s),0,r2$smcount.s)
 
 length(which(is.na(r1$ptcoeff)&is.na(r1$temp)&is.na(r1$elev)&is.na(r1$totba)&r1$pres==1))
 
@@ -578,12 +483,9 @@ r2$temp <- ifelse(!is.na(r2$temp.x)&is.na(r2$temp.y), r2$temp.x,
                      ifelse(is.na(r2$temp.x)&!is.na(r2$temp.y), r2$temp.y, r2$temp.x))
 r2$elev <- ifelse(!is.na(r2$elev)&is.na(r2$ELEV), r2$elev,
                   ifelse(is.na(r2$elev)&!is.na(r2$ELEV), r2$ELEV, r2$elev))
-## r2 <- r2[c(1:79,81:84,87)]  # should be able to delete this, since removing pairwise analysis 
 
 length(which(is.na(r2$ptcoeff)&is.na(r2$temp)&is.na(r2$elev)&is.na(r2$totba)&r2$pres==1))
 
 write.csv(r2, file='Processed Data/Seedling.data.csv', row.names=FALSE)
-
-
 
 

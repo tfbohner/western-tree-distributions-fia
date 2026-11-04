@@ -8,7 +8,7 @@ data {
   vector[N] avgba;
   vector[N] adcount;
   vector[N] temp;
-  int surv[N]; //survivial
+  int surv[N]; // 1 = survived to next census
 
   vector[N_pred] swb_pred;
   real min_swb;
@@ -29,7 +29,7 @@ parameters {
   real b2_swb;
   real b2_temp;  
 
-  real<lower=0.00000001> sigma_c; //added upper
+  real<lower=0.00000001> sigma_c; // small lower bound keeps the sampler off zero
 
 }
 
@@ -40,7 +40,6 @@ transformed parameters {
     pr[i] = a[plot[i]] + b_dia*dia[i] + b_swb*swb[i] + b_ba*avgba[i] + b_adcount*adcount[i] + b_temp*temp[i] + b2_dia*square(dia[i])     + b2_swb*square(swb[i]) + b2_temp*square(temp[i]); 
   }
 }
-
 
 model {
   a ~ normal(a_sp, sigma_c);
@@ -56,12 +55,10 @@ model {
   b2_temp ~ normal(0, 10);
   
   sigma_c ~ student_t(3, 0, 10);
-  // sigma_c ~ normal(0, 1);
 
   //Likelihood
   surv ~ bernoulli_logit(pr); 
 }
-
 
 generated quantities{
   real wet_swb;
@@ -75,15 +72,6 @@ generated quantities{
   real s_hat_abun;
   real s_hat_opt;
   real pr_pred[N_pred];
-
-  // real pr_hat[N];
-  // vector[N] log_lik;
-  // 
-  // for (i in 1:N) log_lik[i] = bernoulli_logit_lpmf(surv[i] | pr[i]);
-
-  // for(i in 1:N){
-  //  pr_hat[i] = bernoulli_logit_rng(pr[i]);
-  // }
 
   for(i in 1:N_pred){
     pr_pred[i] = a_sp + b_swb*swb_pred[i] + b2_swb*square(swb_pred[i]);
@@ -105,6 +93,5 @@ generated quantities{
     s_hat_dry = a_sp + b_swb*dry_swb + b2_swb*square(dry_swb);
     s_hat_pres = a_sp + b_swb*pres_swb + b2_swb*square(pres_swb);
     s_hat_opt = a_sp + b_swb*opt_swb + b2_swb*square(opt_swb);
-
 
 }

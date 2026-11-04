@@ -1,3 +1,8 @@
+## 3_Traits exploratory
+## Exploratory plots of functional traits across species.
+## Author: Teresa Bohner
+## Project: where western trees grow vs. where they thrive (see README)
+
 all_traits <- read.csv("Processed Data/Analysis Ready Data/all_traits.csv")
 
 
@@ -139,38 +144,6 @@ ggplot(all_traits, aes(x=gymno2, y=MaxHeightM, fill=gymno2)) +
   theme(panel.border = element_rect(size=1, fill = NA)) +
   theme(axis.text.x = element_text(angle=30, hjust=1, vjust=1))
 
-
-# # shade tolerance
-# ggplot(all_traits, aes(x=Shade.Tolerance, y=wood_density, fill=Shade.Tolerance)) +
-#   geom_boxplot() +
-#   theme_classic() +
-#   theme(panel.border = element_rect(size=1, fill = NA)) +
-#   theme(axis.text.x = element_text(angle=30, hjust=1, vjust=1))
-# ggplot(all_traits, aes(x=Shade.Tolerance, y=sla_value, fill=Shade.Tolerance)) +
-#   geom_boxplot() +
-#   theme_classic() +
-#   theme(panel.border = element_rect(size=1, fill = NA)) +
-#   theme(axis.text.x = element_text(angle=30, hjust=1, vjust=1))
-# ggplot(all_traits, aes(x=Shade.Tolerance, y=logSeedMass, fill=Shade.Tolerance)) +
-#   geom_boxplot() +
-#   theme_classic() +
-#   theme(panel.border = element_rect(size=1, fill = NA)) +
-#   theme(axis.text.x = element_text(angle=30, hjust=1, vjust=1))
-# ggplot(all_traits, aes(x=Shade.Tolerance, y=value_Lifespan, fill=Shade.Tolerance)) +
-#   geom_boxplot() +
-#   theme_classic() +
-#   theme(panel.border = element_rect(size=1, fill = NA)) +
-#   theme(axis.text.x = element_text(angle=30, hjust=1, vjust=1))
-# ggplot(all_traits, aes(x=Shade.Tolerance, y=value_RootDepth, fill=Shade.Tolerance)) +
-#   geom_boxplot() +
-#   theme_classic() +
-#   theme(panel.border = element_rect(size=1, fill = NA)) +
-#   theme(axis.text.x = element_text(angle=30, hjust=1, vjust=1))
-# ggplot(all_traits, aes(x=Shade.Tolerance, y=MaxHeightM, fill=Shade.Tolerance)) +
-#   geom_boxplot() +
-#   theme_classic() +
-#   theme(panel.border = element_rect(size=1, fill = NA)) +
-#   theme(axis.text.x = element_text(angle=30, hjust=1, vjust=1))
 
 # family
 ggplot(all_traits, aes(x=family, y=wood_density, fill=family)) +

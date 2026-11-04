@@ -1,6 +1,8 @@
+## 6_Pres abs with temp comparison
+## Sensitivity check: occurrence models with soil water balance alone vs. soil water balance plus temperature.
 ## Author: Teresa Bohner
-## Purpose: Chapter 1 analyses: Occurrence, abundance (density), and vital rate modeling
-## Date Modified: 5-8-2019
+## Project: where western trees grow vs. where they thrive (see README)
+
 library(dplyr)
 library(rstan)
 rstan_options(auto_write = TRUE)
@@ -23,15 +25,12 @@ spptable <- read.csv('Ch 1/data for stan/spptable.new.csv')
 spptable <- spptable[,c(1:2)]
 names(spptable)[2] <- "gensp"
 spptable$gensp <- as.character(spptable$gensp)
-# abundance <- rename(abundance, "cwd"="ptcoeff")
-# occurrence <- rename(occurrence, "cwd"="ptcoeff")
 
 length(unique(occurrence$plot.uniqueID))
 
 tableinfo_occ <- dplyr::group_by(occurrence, gensp) %>%
   dplyr::summarize(nplots_p = sum(pres, na.rm=T))
 
-# write.csv(tableinfo_occ, 'Ch 1/data for stan/tableinfo.new.csv', row.names = F)
 
 N_spp <- length(unique(occurrence$spid))
 maxmin <- dplyr::group_by(occurrence, spid)%>%
@@ -99,25 +98,8 @@ for(i in 1:N_spp){
     # , control= list(adapt_delta=0.9, max_treedepth=18)
   )
 
-  # pa.fit <- readRDS(paste("Ch 1/saved models/pa models/pa.fit",i,".rds", sep=""))
   
-  # # data for brms
-  # occurrence$swb <- scale(occurrence$ptcoeff)
-  # prior <- c(prior_string("normal(0,10)", class = "b"))
-  # 
-  # pa.brms <- brm(pres~ -1 + intercept + swb + I(swb^2), data=occurrence, family=bernoulli(), 
-  #                prior=prior, chains = 3, cores=3)
-  # r2_all[i] <- bayes_R2(pa.brms)[1]
-  # 
   ## Occurrence diagnostics----
-  # # extract pareto-k
-  # log_lik1 <- extract_log_lik(pa.fit, merge_chains = FALSE)
-  # rel_n_eff <- relative_eff(exp(log_lik1))
-  # loo1 <- loo(log_lik1, r_eff = rel_n_eff, cores = 2, save_psis = TRUE)
-  # # plot(loo1, label_points = TRUE)
-  # pareto_k_all$N_0.7[i] <- length(which(loo1$diagnostics$pareto_k>0.7))
-  # pareto_k_all$N_1[i] <- length(which(loo1$diagnostics$pareto_k>1))
-  # pareto_k_all$N_tot[i] <- length(loo1$diagnostics$pareto_k)
   
   ## Occurrence output----
   theta <- as.data.frame(summary(pa.fit, pars="theta_pred")$summary[, c(1,4,6,8)])
@@ -183,8 +165,6 @@ for(i in 1:N_spp){
   names(maxminopt_all_med) <- names(maxminopt)
   
   print(paste("spp[",i,"] complete"), sep="")
-  # saveRDS(pa.fit, paste("Ch 1/saved models/pa models/pa.fit",i,".rds", sep=""))
-  # saveRDS(pa.brms, paste("Ch 1/saved models/pa models/pa.fit",i,"b.rds", sep=""))
   
 }
 
@@ -201,7 +181,6 @@ maxminopt_p <- merge(maxminopt_p, spptable, by="spid")
 
 ## Occurrence figures ----
 trans_gray <- adjustcolor(col = "gray",alpha.f = 0.4)
-
 
 
 load("Ch 1/saved models/distribution modeling swb.RData")
@@ -223,7 +202,6 @@ for(i in 1:N_spp){
        xlab="swb gradient", 
        ylab="pr(occurrence)")
   points(binmean.size, binmean.occur)
-  # points(swb[spp==i], jitter(pres[spp==i], 0.1))
   mtext("wet", side=1, line=2, adj=1)
   mtext("dry", side=1, line=2, adj=0)
   
@@ -231,16 +209,9 @@ for(i in 1:N_spp){
                               rev(inv.logit(theta$`2.5%`[theta$spid==i]))),col=trans_gray, border=NA)
   lines(xdum, inv.logit(theta$`50%`[theta$spid==i]), col=4)
   lines(xdum, inv.logit(theta2$`50%`[theta$spid==i]), col=2)
-  # lines(xdum, inv.logit(fixef(pa.brms)[1] + fixef(pa.brms)[2]*swb_pred + fixef(pa.brms)[3]*swb_pred^2))
-  # 
-  # plot(inv.logit(fixef(pa.brms)[1] + fixef(pa.brms)[2]*swb_pred + fixef(pa.brms)[3]*swb_pred^2),
-  #      inv.logit(theta$`50%`[theta$spid==i]))
 
-  # abline(v=(maxminopt_all_mean$opt_swb_p[maxminopt_all_mean$spid==i]-xmean)/xsd, col=2, lty=2)
   abline(v=maxminopt_all_med$opt_swb_p[maxminopt_all_med$spid==i], col=4, lty=2)
   abline(v=maxminopt_p2$opt_swb_p[maxminopt_p2$spid==i], col=2, lty=2)
-  # abline(v=maxminopt_all_med$opt_swb_p_25[maxminopt_all_med$spid==i], col="gray", lty=2)
-  # abline(v=maxminopt_all_med$opt_swb_p_75[maxminopt_all_med$spid==i], col="gray", lty=2)
   
   legend("topright",
          legend=c("without temperature","with temperature"),
@@ -310,9 +281,6 @@ eta_all <- data.frame(eta_all)
 
 med_SWBs_all <- data.frame(matrix(NA, nrow=N_spp, ncol=22))
 r2_all <- rep(NA, length=N_spp)
-# pareto_k_all <- data.frame(matrix(NA, nrow=N_spp, ncol=3))
-# pareto_k_all <- cbind(spptable, pareto_k_all)
-# names(pareto_k_all)[3:5] <- c("N_0.7", "N_1", "N_tot")
 
 abund1 <- abundance
 maxmin1 <- maxmin
@@ -387,44 +355,15 @@ for(i in 34:N_spp){
   )
   
   # data for brms
-  # abundance$swb <- scale(abundance$ptcoeff)
   # # get_prior(totabun~ -1 + intercept + swb + I(swb^2), data=abundance, family=negbinomial())
-  # prior <- c(prior_string("normal(0,10)", class = "b"))
   # 
   # # make_stancode(totabun~ -1 + intercept + swb + I(swb^2), data=abundance, family=negbinomial())
   # nb.brms <- brm(totabun~ -1 + intercept + swb + I(swb^2), data=abundance, family=negbinomial(),
   #                prior=prior, chains=3, cores=3)
   # 
-  # r2_all[i] <- bayes_R2(nb.brms)[1]
-  # saveRDS(nb.brms, paste("Ch 1/saved models/abun models/abun.fit",i,"b.rds", sep=""))
-  # saveRDS(nb.fit, paste("Ch 1/saved models/abun models/abun.fit",i,".rds", sep=""))
   
   # ## Abundance diagnostics----
-  # posterior <- as.array(nb.fit)
-  # color_scheme_set("viridis")
-  # pdf(paste("Output pdfs/abun regression coeff/abun regression coeff", i, ".pdf", sep=""))
-  # # print(plot(loo1, label_points = TRUE))
-  # print(mcmc_intervals(posterior, pars=c("a","b_swb","b_ba","b_temp","b2_swb","b2_temp", "phi")) +
-  #         ggplot2::labs(title = spptable$gensp[i]))
-  # print(mcmc_combo(posterior, pars=c("a","b_swb","b_ba","b_temp")))
-  # print(mcmc_acf_bar(posterior, pars=c("a","b_swb","b_ba","b_temp")))
-  # print(mcmc_combo(posterior, pars=c("b2_swb","b2_temp","phi","lp__")))
-  # print(mcmc_acf_bar(posterior, pars=c("b2_swb","b2_temp","phi","lp__")))
-  # print(mcmc_rhat_hist(rhat(nb.fit)[1:7]))
-  # print(mcmc_neff_hist(neff_ratio(nb.fit)[1:7]))
-  # dev.off()
   
-  # posterior <- as.array(nb.fit)
-  # color_scheme_set("viridis")
-  # pdf(paste("Output pdfs/abun regression coeff/abun regression coeff", i, ".pdf", sep=""))
-  # # print(plot(loo1, label_points = TRUE))
-  # print(mcmc_intervals(posterior, pars=c("a","b_swb","b2_swb","phi")) +
-  #         ggplot2::labs(title = spptable$gensp[i]))
-  # print(mcmc_combo(posterior, pars=c("a","b_swb","b2_swb","phi")))
-  # print(mcmc_acf_bar(posterior, pars=c("a","b_swb","b2_swb","phi")))
-  # print(mcmc_rhat_hist(rhat(nb.fit)[1:4]))
-  # # print(mcmc_neff_hist(neff_ratio(nb.fit)[1:4]))
-  # dev.off()
   
   ## Abundance output----
   # predicted curve
@@ -547,15 +486,12 @@ for(i in 1:N_spp){
        xlab="swb gradient", 
        ylab="Abundance")
   points(binmean.size, binmean.abun)
-  # points(swb[spp==i], jitter(pres[spp==i], 0.1))
   mtext("wet", side=1, line=2, adj=1)
   mtext("dry", side=1, line=2, adj=0)
   
   polygon(c(xdum,rev(xdum)),c(eta_all$`97.5%`[eta_all$spid==i],rev(eta_all$`2.5%`[eta_all$spid==i])),col=trans_gray, border=NA)
   lines(xdum, eta_all$`50%`[eta_all$spid==i], col=4)
   lines(xdum, eta2$`50%`[eta2$spid==i], col=2)
-  # abline(v=med_SWBs_all$wet_swb[med_SWBs_all$spid==i], lwd=2)
-  # abline(v=med_SWBs_all$dry_swb[med_SWBs_all$spid==i], lwd=2)
   abline(v=abunswbs$opt_swb[abunswbs$spid==i], col=4, lty=2)
   abline(v=abunswbs_2$opt_swb[abunswbs_2$spid==i], col=2, lty=2)
   
@@ -589,7 +525,6 @@ save.image('Ch 1/saved models/abundance modeling comparison.RData', compress=T)
 
 ### Growth models----
 rm(list = ls())
-# library(tidybayes)
 load("Ch 1/saved models/growth loop_temp.RData")
 ## for trying out different distributions
 i=1
@@ -606,7 +541,6 @@ cov.sds <- apply(cov.mat.raw, 2, sd, na.rm=T)
 brms.dat <- dplyr::select(trees, c(gensp, baicm, plot.uniqueID)) %>%
   bind_cols(as.data.frame(cov.mat.raw)) 
 #%>%
- # subset(baicm>-2)
 names(brms.dat)[4:8] <- c("dia","swb", "avgba", "adcount", "temp")
 brms.dat$plot <- as.numeric(droplevels(as.factor(brms.dat$plot.uniqueID)))
 
@@ -688,9 +622,6 @@ grow.1 <- brm(bf(baicm~ (1|plot) + swb + I(swb^2) +
 )
 
 
-# newdata <- data.frame(swb=0, temp=0, avgba=0, adcount=0, dia=0)
-# predict(grow.1, newdata=newdata, re_formula = NA)
-
 list_of_data <- marginal_effects(grow.1, resolution=1000)
 par <- list_of_data$swb[which.max(list_of_data$swb$estimate__),1:7]
 par2 <- par
@@ -764,10 +695,8 @@ grow.brms.lnorm <- brm(bf(posbai~ -1 + intercept + (1|plot) + dia + I(dia^2) +
 
 ## Mixture model----
 ## can we model this as a mixture of two gaussian processes? Not sure how to interpret this anyhow...and seems complicated
-# mix <- mixture(gaussian, gaussian)
 # prior <- c(
 #   prior(normal(0, 0.5), sigma1),
-#   prior(normal(0, 10), sigma2)
 # )
 # 
 # grow.brms.mix <- brm(bf(baicm~ (1|plot) + dia + I(dia^2) +
@@ -793,10 +722,6 @@ grow.brms <- grow.brms.normv # *pref
 grow.brms <- grow.brms.norm.bc
 grow.brms <- grow.brms.norm   # Jeff: interesting that ordinary and pearson residuals are close to identical in normal model while show bid difference in normv
 
-# grow.brms <- grow.brms.normv
-# grow.brms <- grow.brms.sn
-# grow.brms <- grow.brms.snv
-# grow.brms <- grow.brms.sn.bc
 
 ## posterior predictive distributions
 pp_check(grow.brms) #+ xlim(-20, 150)
@@ -841,9 +766,6 @@ abline(0,0, col="red")
 
 plot(brms.dat$avgba, res[,1], xlab="average stem size", ylab="residual", main=spptable$gensp[spptable$spid==i])
 abline(0,0, col="red")
-
-
-
 
 
 #### All species pdfs----
@@ -1021,6 +943,5 @@ res <- residuals(mod, summary = TRUE)
 fit <- predict(fitted, summary=TRUE)
 plot(fit[,1], res[,1]) 
 abline(0,0, col="red")
-
 
 
