@@ -23,7 +23,7 @@ getkey(service="entrez")
 ## 1: Read in data files ----
 data.path <- "Processed Data/Analysis Ready Data/"
 table.path <- "Output tables/"
-fig.path <- fill_this_in
+fig.path <- "Output pdfs/"
 
 all.data0 <- read.csv(paste0(data.path, "all_mismatch_and_traits.csv"))
 all.data <- dplyr::select(all.data0, gensp,  vr,mismatch_p, abmis_p, cost_p, wood_density, sla_value, value_RootDepth, logSeedMass, value_Lifespan, MaxHeightM, med_plot_swb)

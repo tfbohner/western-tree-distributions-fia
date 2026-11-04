@@ -14,7 +14,7 @@ library(loo)
 library(brms)
 library(ggpmisc)
 
-setwd("~/Dropbox/FIA data/")
+## Paths below follow the original project folder layout ("Ch 1/..."); point them at your data
 
 #################### Occurence data manipulation----
 rm(list = ls())

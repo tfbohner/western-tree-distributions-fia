@@ -85,8 +85,6 @@ climate.fia <- rename(climate.fia, ptcoeff=RASTERVALU, temp=temp_rnd)
 # 
 # temp <- stack(t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12)
 # 
-# states <- readOGR("/Users/diezlab/Google Drive File Stream/My Drive/GIS/shapefiles/cb_2016_us_state_500k/cb_2016_us_state_500k.shp")
-# states <- readOGR("/Users/teresabohner/Google Drive File Stream/My Drive/GIS/shapefiles/cb_2016_us_state_500k/cb_2016_us_state_500k.shp")
 # states1 <-  states[states$NAME=="California"|states$NAME=="Oregon"|states$NAME=="Washington",]
 # states.f <- fortify(states1, regions="STUSPS")
 # 
